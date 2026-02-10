@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\ExperimentController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -19,6 +20,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/projects', [ProjectController::class, 'index']);
     Route::get('/projects/{id}', [ProjectController::class, 'show']);
     Route::get('/projects/{id}/download', [ProjectController::class, 'downloadDocument']);
+    Route::get('/experiments/{experiment}/samples', [SampleController::class, 'index']);
+
+
 
 });
 Route::middleware('auth:sanctum','role:admin')->group(function () {
@@ -27,6 +31,8 @@ Route::middleware('auth:sanctum','role:admin')->group(function () {
     Route::delete("/users/{id}",[UserController::class,'destroy']);
     Route::get('users/{id}/role',[UserController::class,'getAllUsersForRole']);
     Route::delete('/projects/{id}', [ProjectController::class, 'destroy']);
+    Route::post('/experiments/{experiment}/samples', [SampleController::class, 'store']);
+    Route::delete('/samples/{sample}', [SampleController::class, 'destroy']);
 
 
 });
