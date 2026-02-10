@@ -16,9 +16,10 @@ return new class extends Migration
             $table->dateTime('start_time');
             $table->dateTime('end_time');
             $table->string('purpose');
-            $table->string('status'); // Pending, Approved, Rejected
-            $table->foreignId('user_id')->constrained(); // Ko kreira
-            $table->foreignId('project_id')->constrained(); // Vezana za projekat
+            $table->string('status');
+            $table->foreignId('user_id')->constrained();
+            $table->foreignId('project_id')->constrained();
+            $table->foreignId('equipment_id')->constrained();
             $table->timestamps();
         });
     }

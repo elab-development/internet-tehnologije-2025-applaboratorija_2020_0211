@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Equipment;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -25,6 +26,9 @@ class ReservationFactory extends Factory
             'status' => $this->faker->randomElement(['pending', 'approved', 'rejected']),
             'user_id' => User::factory(),
             'project_id' => Project::factory(),
+            'equipment_id' => Equipment::factory(),
+
+
         ];
     }
 }
