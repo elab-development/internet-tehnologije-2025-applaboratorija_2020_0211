@@ -34,5 +34,8 @@ Route::middleware('auth:sanctum','role:admin,researcher')->group(function () {
     Route::post('/projects', [ProjectController::class, 'store']);
     Route::put('/projects/{id}', [ProjectController::class, 'update']);
     Route::post('/projects/{id}/upload-document', [ProjectController::class, 'uploadDocument']);
-
+    Route::get('/projects/{project}/experiments', [ExperimentController::class, 'index']);
+    Route::post('/projects/experiments', [ExperimentController::class, 'store']);
+    Route::put('/experiments/{experiment}', [ExperimentController::class, 'update']);
+    Route::delete('/experiments/{experiment}', [ExperimentController::class, 'destroy']);
 });
