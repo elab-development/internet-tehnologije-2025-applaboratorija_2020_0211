@@ -50,4 +50,8 @@ class AuthController extends Controller
         return response()->json(['user'=>new UserResource($user),'token'=>$token,"message"=>"Uspesno ste se ulogovali"],200);
 
     }
+    public function me(Request $request){
+        $user= Auth::user();
+        return response()->json(['user'=>new UserResource($user),'message'=>'Uspesno ste se ulogovali'],200);
+    }
 }
