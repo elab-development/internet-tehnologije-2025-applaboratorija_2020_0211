@@ -23,6 +23,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/projects/{id}', [ProjectController::class, 'show']);
     Route::get('/projects/{id}/download', [ProjectController::class, 'downloadDocument']);
     Route::get('/experiments/{experiment}/samples', [SampleController::class, 'index']);
+    Route::get('/projects/search', [ProjectController::class, 'search'])->middleware('auth:sanctum');
+
 
 
 

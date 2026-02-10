@@ -135,5 +135,25 @@ class ProjectController extends Controller
             storage_path('app/public/' . $project->document_path)
         );
     }
+    public function search(Request $request)
+    {
+        $query = Project::query();
+
+        // Pretraga po title
+        if ($request->has('title')) {
+            $query->where('title', 'LIKE', '%' . $request->title . '%');
+        }
+
+        // Filter po category
+        if ($request->has('category')) {
+            $query->where('category', $request->category);
+        }
+
+        $projects = $query->paginate(10);
+
+        return response()->json([
+            'data' => ProjectResource::collection($projects)
+        ]);
+    }
 
 }
