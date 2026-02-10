@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Favorite;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -54,5 +55,8 @@ class DatabaseSeeder extends Seeder
         $reservation = Reservation::factory(100)->create();
 
         $equipment = Equipment::factory(20)->create();
+        Favorite::factory(40)->create();
+
+
     }
 }

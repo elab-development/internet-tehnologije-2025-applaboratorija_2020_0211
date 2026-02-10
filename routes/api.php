@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ExperimentController;
+use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SampleController;
@@ -24,7 +25,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/projects/{id}/download', [ProjectController::class, 'downloadDocument']);
     Route::get('/experiments/{experiment}/samples', [SampleController::class, 'index']);
     Route::get('/projects/search', [ProjectController::class, 'search'])->middleware('auth:sanctum');
-
+    Route::get("/favorites",[FavoriteController::class, 'index']);
+    Route::post("/favorites",[FavoriteController::class, 'store']);
+    Route::delete("/favorites",[FavoriteController::class, 'destroy']);
 
 
 
