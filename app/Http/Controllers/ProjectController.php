@@ -39,6 +39,9 @@ class ProjectController extends Controller
             'budget' => 'nullable|numeric',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date',
+            'category' => 'required|string',
+
+
             'status' => 'required|string',
             'document' => 'nullable|file|mimes:pdf|max:10240',
         ]);

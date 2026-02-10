@@ -27,6 +27,15 @@ class ProjectFactory extends Factory
             'start_date' => now()->subMonths(rand(1, 12)),
             'end_date' => now()->addMonths(rand(3, 24)),
             'status' => $this->faker->randomElement(['planned', 'active', 'completed']),
+            'category' => $this->faker->randomElement([
+                'IT',
+                'Medicine',
+                'Biology',
+                'Physics',
+                'Chemistry',
+                'Data Science',
+                'Engineering'
+            ]),
             'lead_user_id' => User::factory(),
             'document_path' => 'projects/documents/project_' . Str::random(10) . '.pdf',
 

@@ -8,9 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Project extends Model
 {
     use HasFactory;
-    protected $fillable = ['title', 'code', 'description', 'budget'
-        , 'start_date','category', 'end_date', 'status'
-        , 'lead_user_id','document_path'];
+    protected $fillable = ['title', 'code', 'description', 'budget', 'start_date','category', 'end_date', 'status', 'lead_user_id','document_path'];
+
 
     public function leader()
     {

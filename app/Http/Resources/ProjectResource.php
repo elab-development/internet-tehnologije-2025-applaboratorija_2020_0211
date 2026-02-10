@@ -26,7 +26,8 @@ class ProjectResource extends JsonResource
             'document_url' => $this->document_path
                 ? asset('storage/' . $this->document_path)
                 : null,
-            'leader' => new UserResource($this->leader)
+            'leader' => new UserResource($this->leader),
+            'category'=>$this->category
 
         ];
     }
