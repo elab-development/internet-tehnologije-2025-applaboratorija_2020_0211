@@ -28,6 +28,9 @@ class ProjectFactory extends Factory
             'end_date' => now()->addMonths(rand(3, 24)),
             'status' => $this->faker->randomElement(['planned', 'active', 'completed']),
             'lead_user_id' => User::factory(),
+            'document_path' => 'projects/documents/project_' . Str::random(10) . '.pdf',
+
+
         ];
     }
 }
