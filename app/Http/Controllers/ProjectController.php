@@ -139,12 +139,10 @@ class ProjectController extends Controller
     {
         $query = Project::query();
 
-        // Pretraga po title
         if ($request->has('title')) {
             $query->where('title', 'LIKE', '%' . $request->title . '%');
         }
 
-        // Filter po category
         if ($request->has('category')) {
             $query->where('category', $request->category);
         }

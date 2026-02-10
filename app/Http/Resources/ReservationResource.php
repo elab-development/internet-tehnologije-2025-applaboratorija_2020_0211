@@ -20,7 +20,7 @@ class ReservationResource extends JsonResource
             'end_time'=>$this->end_time,
             'purpose'=>$this->status,
             'user'=>$this->user,
-            'project'=>$this->project->name,
-            'equpment'=>$ths->equpment,
+            'project'=>new ProjectResource($this->project),
+            "equipment"=>new EquipmentResource($this->equipment)
         ];    }
 }

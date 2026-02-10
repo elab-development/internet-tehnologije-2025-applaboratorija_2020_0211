@@ -88,4 +88,14 @@ class ExperimentController extends Controller
         $experiment->delete();
         return response()->json(['message' => 'Experiment deleted successfully']);
     }
+    public function all()
+    {
+        $experiments = Experiment::with('project')
+            ->orderBy('date_performed', 'desc')
+            ->get();
+
+        return response()->json([
+            'data' => $experiments
+        ]);
+    }
 }

@@ -36,26 +36,26 @@ class ReservationController extends Controller
      */
     public function store(Request $request)
     {
-        $validator=Validator::make($request->all(),[
-            'start_time'=>'required',
-            'end_time'=>'required',
-            'project_id'=>'required',
-            'purpose'=>'required',
-
+        $validator = Validator::make($request->all(), [
+            'start_time'  => 'required|date',
+            'end_time'    => 'required|date|after:start_time',
+            'project_id'  => 'required|exists:projects,id',
+            'equipment_id'=> 'required|exists:equipment,id',
+            'purpose'     => 'required|string',
         ]);
         if($validator->fails()){
             return response()->json($validator->errors()->toJson(),400);
         }
         $user=Auth::user();
 
-        $reservation=Reservation::create([
-            'start_time'=>$request->start_time,
-            'end_time'=>$request->end_time,
-            'project_id'=>$request->project_id,
-            'purpose'=>$request->purpose,
-            'user_id'=>$user->id,
-            'status'=>'pending',
-
+        $reservation = Reservation::create([
+            'start_time'   => $request->start_time,
+            'end_time'     => $request->end_time,
+            'project_id'   => $request->project_id,
+            'equipment_id' => $request->equipment_id,
+            'purpose'      => $request->purpose,
+            'user_id'      => Auth::id(),
+            'status'       => 'pending',
         ]);
         return response()->json(['data' => new ReservationResource($reservation)], 201);
     }

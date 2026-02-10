@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ExperimentResource;
+use App\Http\Resources\SampleResource;
+use App\Models\Experiment;
 use App\Models\Sample;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -13,8 +16,8 @@ class SampleController extends Controller
      */
     public function index($experimentId)
     {
-        $samples = Sample::where('experiment_id', $experimentId)->get();
-        return response()->json(['data' =>  SampleResource::collection($samples),]);
+        $experiments=Experiment::with('project')->get();
+        return response()->json(['data' =>  ExperimentResource::collection($experiments),]);
     }
 
     /**
