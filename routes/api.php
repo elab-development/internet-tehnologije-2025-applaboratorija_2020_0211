@@ -3,6 +3,8 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ExperimentController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\SampleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +35,12 @@ Route::middleware('auth:sanctum','role:admin')->group(function () {
     Route::delete('/projects/{id}', [ProjectController::class, 'destroy']);
     Route::post('/experiments/{experiment}/samples', [SampleController::class, 'store']);
     Route::delete('/samples/{sample}', [SampleController::class, 'destroy']);
+    Route::get('/reservations', [ReservationController::class, 'index']);
+    Route::get('/reservations/{id}', [ReservationController::class, 'show']);
+    Route::post('/reservations', [ReservationController::class, 'store']);
+
+    Route::put('/reservations/{id}', [ReservationController::class, 'update']);
+    Route::delete('/reservations/{id}', [ReservationController::class, 'destroy']);
 
 
 });
