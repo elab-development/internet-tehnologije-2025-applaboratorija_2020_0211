@@ -1,0 +1,60 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # 1. Baza podataka (MySQL)
+  db:
+    image: mysql:8.0
+    container_name: researchhub_db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: researchhub
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # 2. Backend (Laravel)
+  backend:
+    build:
+      context: ./lab-backend
+      dockerfile: Dockerfile
+    container_name: researchhub_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    volumes:
+      # Mapiranje storage-a kako bi uploadovani PDF-ovi bili vidljivi i na hostu
+      - ./lab-backend/storage/app/public:/var/www/html/storage/app/public
+    environment:
+      # Prepisu .env fajl unutar kontejnera
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: researchhub
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      APP_URL: http://localhost:8000
+      FRONTEND_URL: http://localhost:3000
+      SANCTUM_STATEFUL_DOMAINS: localhost:3000
+      # Zaštite
+      RECAPTCHA_ENABLED: "false"
+      MAIL_MAILER: log
+
+  # 3. Frontend (React + Vite + Nginx)
+  frontend:
+    build:
+      context: ./lab-front
+      dockerfile: Dockerfile
+    container_name: researchhub_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
