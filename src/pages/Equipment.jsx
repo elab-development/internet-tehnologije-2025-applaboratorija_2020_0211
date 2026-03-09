@@ -1,10 +1,8 @@
 import {
     Box,
-    Typography,
     Grid,
     Card,
     CardContent,
-    Chip,
     Button,
     Dialog,
     DialogTitle,
@@ -13,10 +11,12 @@ import {
     TextField,
     MenuItem,
     IconButton,
+    Typography,
 } from '@mui/material';
 import { Build, Add, Delete } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
-import axiosClient from "../axiosClient.js";
+import { PageHeader, EmptyState } from '../components/index.js';
+import axiosClient from '../axiosClient.js';
 
 export function Equipment() {
     const [equipment, setEquipment] = useState([]);
@@ -27,8 +27,8 @@ export function Equipment() {
         equipment_id: '',
         start_date: '',
         end_date: '',
-        purpose:"",
-        project_id:""
+        purpose: '',
+        project_id: '',
     });
     const [projects, setProjects] = useState([]);
 
@@ -54,7 +54,6 @@ export function Equipment() {
         fetchProjects();
     }, []);
 
-
     const isReserved = (equipmentId) =>
         reservations.some((r) => r.equipment.id === equipmentId);
 
@@ -66,7 +65,7 @@ export function Equipment() {
 
     const handleAddReservation = async () => {
         if (!form.project_id) {
-            alert("Morate izabrati projekat!");
+            alert('Morate izabrati projekat!');
             return;
         }
 
@@ -90,71 +89,75 @@ export function Equipment() {
         fetchReservations();
     };
 
-
     const handleDeleteReservation = async (id) => {
         await axiosClient.delete(`/reservations/${id}`);
         fetchReservations();
     };
 
-
-
     return (
         <Box>
-            <Box display="flex" justifyContent="space-between" mb={3}>
-                <Box>
-                    <Typography variant="h4">
-                        Rezervacije laboratorijske opreme
-                    </Typography>
-                    <Typography color="text.secondary">
-                        Pregled i upravljanje rezervacijama
-                    </Typography>
-                </Box>
-
-                <Button
-                    variant="contained"
-                    startIcon={<Add />}
-                    onClick={() => setOpen(true)}
-                >
-                    Nova rezervacija
-                </Button>
-            </Box>
-
-
+            {/* ✅ PageHeader */}
+            <PageHeader
+                title="Rezervacije laboratorijske opreme"
+                subtitle="Pregled i upravljanje rezervacijama"
+                action={
+                    <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={() => setOpen(true)}
+                    >
+                        Nova rezervacija
+                    </Button>
+                }
+            />
 
             <Box mt={5}>
-                <Typography variant="h5" gutterBottom>
+                <Typography variant="h5" gutterBottom fontWeight={600}>
                     Aktivne rezervacije
                 </Typography>
 
-                {reservations.map((res) => (
-                    <Card key={res.id} sx={{ mb: 2 }}>
-                        <CardContent
-                            sx={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Box>
-                                <Typography variant="subtitle1">
-                                    {res.equipment.name}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {res.start_time} → {res.end_time}
-                                </Typography>
-                            </Box>
-
-                            <IconButton
-                                color="error"
-                                onClick={() => handleDeleteReservation(res.id)}
+                {reservations.length === 0 ? (
+                    // ✅ EmptyState
+                    <EmptyState
+                        icon={<Build sx={{ fontSize: 48 }} />}
+                        title="Nema aktivnih rezervacija"
+                        subtitle='Kreirajte novu rezervaciju klikom na "Nova rezervacija".'
+                    />
+                ) : (
+                    reservations.map((res) => (
+                        <Card key={res.id} sx={{ mb: 2 }}>
+                            <CardContent
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                }}
                             >
-                                <Delete />
-                            </IconButton>
-                        </CardContent>
-                    </Card>
-                ))}
-            </Box>
+                                <Box>
+                                    <Typography variant="subtitle1">
+                                        {res.equipment.name}
+                                    </Typography>
+                                    <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                    >
+                                        {res.start_time} → {res.end_time}
+                                    </Typography>
+                                </Box>
 
+                                <IconButton
+                                    color="error"
+                                    onClick={() =>
+                                        handleDeleteReservation(res.id)
+                                    }
+                                >
+                                    <Delete />
+                                </IconButton>
+                            </CardContent>
+                        </Card>
+                    ))
+                )}
+            </Box>
 
             <Dialog open={open} onClose={() => setOpen(false)} fullWidth>
                 <DialogTitle>Nova rezervacija</DialogTitle>
@@ -166,8 +169,12 @@ export function Equipment() {
                         fullWidth
                         margin="normal"
                         value={form.equipment_id}
-                        onChange={(e) => setForm({...form,equipment_id: e.target.value})}
-
+                        onChange={(e) =>
+                            setForm({
+                                ...form,
+                                equipment_id: e.target.value,
+                            })
+                        }
                     >
                         {equipment.map((eq) => (
                             <MenuItem key={eq.id} value={eq.id}>
@@ -183,7 +190,10 @@ export function Equipment() {
                         margin="normal"
                         value={form.project_id}
                         onChange={(e) =>
-                            setForm({ ...form, project_id: e.target.value })
+                            setForm({
+                                ...form,
+                                project_id: e.target.value,
+                            })
                         }
                     >
                         {projects.map((project) => (
@@ -200,7 +210,10 @@ export function Equipment() {
                         InputLabelProps={{ shrink: true }}
                         value={form.start_time}
                         onChange={(e) =>
-                            setForm({ ...form, start_time: e.target.value })
+                            setForm({
+                                ...form,
+                                start_time: e.target.value,
+                            })
                         }
                     />
 
@@ -212,7 +225,10 @@ export function Equipment() {
                         InputLabelProps={{ shrink: true }}
                         value={form.end_time}
                         onChange={(e) =>
-                            setForm({ ...form, end_time: e.target.value })
+                            setForm({
+                                ...form,
+                                end_time: e.target.value,
+                            })
                         }
                     />
 
@@ -224,15 +240,20 @@ export function Equipment() {
                         rows={3}
                         value={form.purpose}
                         onChange={(e) =>
-                            setForm({ ...form, purpose: e.target.value })
+                            setForm({
+                                ...form,
+                                purpose: e.target.value,
+                            })
                         }
                     />
-
                 </DialogContent>
 
                 <DialogActions>
                     <Button onClick={() => setOpen(false)}>Otkaži</Button>
-                    <Button variant="contained" onClick={handleAddReservation}>
+                    <Button
+                        variant="contained"
+                        onClick={handleAddReservation}
+                    >
                         Sačuvaj
                     </Button>
                 </DialogActions>

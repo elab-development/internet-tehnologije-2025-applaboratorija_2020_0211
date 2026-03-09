@@ -1,73 +1,82 @@
-import React, {useEffect, useState} from "react";
-import {
-    Card,
-    CardContent,
-    Box,
-    Typography,
-    Grid,
-    Paper,
-} from "@mui/material";
+import { useEffect, useState } from 'react';
+import { Box, Grid, Paper, Typography } from '@mui/material';
+import { Bookmark } from '@mui/icons-material';
+import { useStateContext } from '../context/ContextProvider.jsx';
+import { StatCard, PageHeader, EmptyState } from '../components/index.js';
+import axiosClient from '../axiosClient.js';
 
-import BookmarkIcon from "@mui/icons-material/Bookmark";
-import DescriptionIcon from "@mui/icons-material/Description";
-import FolderIcon from "@mui/icons-material/Folder";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import {useStateContext} from "../context/ContextProvider.jsx";
-import {Bookmark, Description} from "@mui/icons-material";
-import axiosClient from "../axiosClient.js";
-
-export  function UserHome() {
+export function UserHome() {
     const { user } = useStateContext();
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
-    useEffect(() => {
-        axiosClient.get(`/favorites`).then(({data}) => {
-            console.log(data);
-            setFavorites(data.favorites);
-        }).finally(()=>setLoading(false));
-    })
 
+    // ✅ FIX: dodato [] kao dependency array → poziva se samo jednom
+    useEffect(() => {
+        axiosClient
+            .get('/favorites')
+            .then(({ data }) => {
+                setFavorites(data.favorites || []);
+            })
+            .catch((err) => console.error('Fetch favorites failed:', err))
+            .finally(() => setLoading(false));
+    }, []); // ← KRITIČNI FIX
 
     return (
-
         <Box>
-            <Typography variant="h4" gutterBottom>
-                Dashboard
-            </Typography>
-            <Typography variant="body1" color="text.secondary" paragraph>
-                Dobrodošli na Naučni Portal. Ovde možete pregledati naučne radove, projekte i opremu.
-            </Typography>
+            <PageHeader
+                title={`Dobrodošli, ${user?.name || 'Korisniče'}!`}
+                subtitle="Ovde možete pregledati naučne radove i upravljati kolekcijom."
+            />
 
             <Grid container spacing={3} sx={{ mb: 4 }}>
-
                 <Grid item xs={12} sm={4}>
-                    <Card sx={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', color: 'white' }}>
-                        <CardContent>
-                            <Box display="flex" alignItems="center" justifyContent="space-between">
-                                <Box>
-                                    <Typography variant="h4">{favorites.length}</Typography>
-                                    <Typography variant="body2">Sačuvani radovi</Typography>
-                                </Box>
-                                <Bookmark sx={{ fontSize: 48, opacity: 0.8 }} />
-                            </Box>
-                        </CardContent>
-                    </Card>
+                    {/* ✅ koristi reusable StatCard komponentu */}
+                    <StatCard
+                        title="Sačuvani radovi"
+                        value={favorites.length}
+                        icon={<Bookmark sx={{ fontSize: 48 }} />}
+                        gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+                    />
                 </Grid>
             </Grid>
 
-
-            <Paper sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                    Nedavni naučni radovi
+            <Paper sx={{ p: 3, borderRadius: 3 }}>
+                <Typography variant="h6" gutterBottom fontWeight={600}>
+                    Nedavno sačuvani radovi
                 </Typography>
-                {favorites.slice(0, 3).map((favorite) => (
-                    <Box key={favorite.id} sx={{ mb: 2, pb: 2, borderBottom: '1px solid #eee' }}>
-                        <Typography variant="subtitle1">{favorite.project.title}</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            {favorite.project.leader.name} • {favorite.project.category}
-                        </Typography>
-                    </Box>
-                ))}
+
+                {loading ? (
+                    <Typography color="text.secondary">
+                        Učitavanje...
+                    </Typography>
+                ) : favorites.length === 0 ? (
+                    // ✅ koristi reusable EmptyState komponentu
+                    <EmptyState
+                        icon={<Bookmark sx={{ fontSize: 48 }} />}
+                        title="Nemate sačuvanih radova"
+                        subtitle='Idite na "Naučni radovi" i sačuvajte radove koji vas zanimaju.'
+                    />
+                ) : (
+                    favorites.slice(0, 3).map((fav) => (
+                        <Box
+                            key={fav.id}
+                            sx={{
+                                mb: 2,
+                                pb: 2,
+                                borderBottom: '1px solid',
+                                borderColor: 'divider',
+                            }}
+                        >
+                            <Typography variant="subtitle1" fontWeight={500}>
+                                {fav.project.title}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                {fav.project.leader?.name} •{' '}
+                                {fav.project.category}
+                            </Typography>
+                        </Box>
+                    ))
+                )}
             </Paper>
         </Box>
     );

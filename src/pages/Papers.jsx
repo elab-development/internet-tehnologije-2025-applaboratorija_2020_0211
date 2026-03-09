@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
     Box,
-    Typography,
     TextField,
     Grid,
     Card,
@@ -14,12 +13,22 @@ import {
     Select,
     FormControl,
     InputLabel,
-    CircularProgress
+    CircularProgress,
+    Typography,
 } from '@mui/material';
 import { Search, Bookmark, BookmarkBorder, Download } from '@mui/icons-material';
-import axiosClient from "../axiosClient.js";
+import { PageHeader, EmptyState, SortSelect } from '../components/index.js';
+import axiosClient from '../axiosClient.js';
 
-const fields = ['IT', 'Medicine', 'Biology', 'Physics', 'Chemistry', 'Data Science', 'Engineering'];
+const fields = [
+    'IT',
+    'Medicine',
+    'Biology',
+    'Physics',
+    'Chemistry',
+    'Data Science',
+    'Engineering',
+];
 
 export function Papers() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -33,62 +42,70 @@ export function Papers() {
 
     useEffect(() => {
         // Fetch favorites once
-        axiosClient.get('/favorites')
+        axiosClient
+            .get('/favorites')
             .then(({ data }) => {
-                const favoriteProjectIds = data.favorites.map(fav => fav.project.id);
+                const favoriteProjectIds = data.favorites.map(
+                    (fav) => fav.project.id
+                );
                 setSavedPapers(favoriteProjectIds);
             })
-            .catch(err => console.error("Fetch favorites failed:", err));
+            .catch((err) => console.error('Fetch favorites failed:', err));
     }, []);
 
     // Fetch papers when searchTerm, selectedField or page changes
     useEffect(() => {
         setLoading(true);
 
-        axiosClient.get('/projects/search', {
-            params: {
-                q: searchTerm || undefined,
-                category: selectedField !== 'all' ? selectedField : undefined,
-                page: page
-            }
-        })
+        axiosClient
+            .get('/projects/search', {
+                params: {
+                    q: searchTerm || undefined,
+                    category:
+                        selectedField !== 'all' ? selectedField : undefined,
+                    page: page,
+                },
+            })
             .then(({ data }) => {
                 if (page === 1) {
                     setPapers(data.data);
                 } else {
-                    setPapers(prev => [...prev, ...data.data]);
+                    setPapers((prev) => [...prev, ...data.data]);
                 }
-                setHasMore(data.data.length > 0); // ako nema novih rezultata, nema više
+                setHasMore(data.data.length > 0);
             })
-            .catch(err => {
-                console.error("Fetch projects failed:", err);
+            .catch((err) => {
+                console.error('Fetch projects failed:', err);
                 if (page === 1) setPapers([]);
                 setHasMore(false);
             })
             .finally(() => setLoading(false));
-
     }, [searchTerm, selectedField, page]);
 
     const toggleSave = (projectId) => {
         const isSaved = savedPapers.includes(projectId);
 
         if (isSaved) {
-            axiosClient.delete('/favorites', { data: { project_id: projectId } })
+            axiosClient
+                .delete('/favorites', { data: { project_id: projectId } })
                 .then(() => {
-                    setSavedPapers(prev => prev.filter(id => id !== projectId));
+                    setSavedPapers((prev) =>
+                        prev.filter((id) => id !== projectId)
+                    );
                 })
-                .catch(err => console.error("Remove favorite failed:", err));
+                .catch((err) => console.error('Remove favorite failed:', err));
         } else {
-            axiosClient.post('/favorites', { project_id: projectId })
+            axiosClient
+                .post('/favorites', { project_id: projectId })
                 .then(() => {
-                    setSavedPapers(prev => [...prev, projectId]);
+                    setSavedPapers((prev) => [...prev, projectId]);
                 })
-                .catch(err => console.error("Add favorite failed:", err));
+                .catch((err) => console.error('Add favorite failed:', err));
         }
     };
 
     const handleLoadMore = () => {
-        if (hasMore) setPage(prev => prev + 1);
+        if (hasMore) setPage((prev) => prev + 1);
     };
 
     // Reset page to 1 kad se menja search ili kategorija
@@ -98,12 +115,11 @@ export function Papers() {
 
     return (
         <Box>
-            <Typography variant="h4" gutterBottom>
-                Naučni radovi
-            </Typography>
-            <Typography variant="body1" color="text.secondary" paragraph>
-                Pretražite i filtrirajte naučne radove po različitim kriterijumima
-            </Typography>
+            {/* ✅ PageHeader */}
+            <PageHeader
+                title="Naučni radovi"
+                subtitle="Pretražite i filtrirajte naučne radove po različitim kriterijumima"
+            />
 
             <Box sx={{ mb: 4 }}>
                 <Grid container spacing={2}>
@@ -128,7 +144,9 @@ export function Papers() {
                             <Select
                                 value={selectedField}
                                 label="Kategorija"
-                                onChange={(e) => setSelectedField(e.target.value)}
+                                onChange={(e) =>
+                                    setSelectedField(e.target.value)
+                                }
                             >
                                 <MenuItem value="all">Sve kategorije</MenuItem>
                                 {fields.map((field) => (
@@ -150,7 +168,11 @@ export function Papers() {
 
             {!loading && (
                 <>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 2 }}
+                    >
                         Pronađeno: {papers.length} radova
                     </Typography>
 
@@ -159,22 +181,58 @@ export function Papers() {
                             <Grid item xs={12} key={paper.id}>
                                 <Card>
                                     <CardContent>
-                                        <Box display="flex" justifyContent="space-between" alignItems="start">
+                                        <Box
+                                            display="flex"
+                                            justifyContent="space-between"
+                                            alignItems="start"
+                                        >
                                             <Box flex={1}>
-                                                <Typography variant="h6" gutterBottom>
+                                                <Typography
+                                                    variant="h6"
+                                                    gutterBottom
+                                                >
                                                     {paper.title}
                                                 </Typography>
-                                                <Typography variant="body2" color="text.secondary" gutterBottom>
+                                                <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                    gutterBottom
+                                                >
                                                     {paper.leader.name}
                                                 </Typography>
-                                                <Typography variant="body2" paragraph>
+                                                <Typography
+                                                    variant="body2"
+                                                    paragraph
+                                                >
                                                     {paper.description}
                                                 </Typography>
                                                 <Box sx={{ mb: 1 }}>
-                                                    <Chip label={paper.category} size="small" color="primary" sx={{ mr: 1 }} />
-                                                    <Chip label={paper.end_date} size="small" variant="outlined" sx={{ mr: 1 }} />
-                                                    <Chip label={paper.budget + " $"} size="small" variant="outlined"  sx={{ mr: 1 }} />
-                                                    <Chip label={paper.status} size="small" variant="outlined"  sx={{ mr: 1 }} />
+                                                    <Chip
+                                                        label={paper.category}
+                                                        size="small"
+                                                        color="primary"
+                                                        sx={{ mr: 1 }}
+                                                    />
+                                                    <Chip
+                                                        label={paper.end_date}
+                                                        size="small"
+                                                        variant="outlined"
+                                                        sx={{ mr: 1 }}
+                                                    />
+                                                    <Chip
+                                                        label={
+                                                            paper.budget + ' $'
+                                                        }
+                                                        size="small"
+                                                        variant="outlined"
+                                                        sx={{ mr: 1 }}
+                                                    />
+                                                    <Chip
+                                                        label={paper.status}
+                                                        size="small"
+                                                        variant="outlined"
+                                                        sx={{ mr: 1 }}
+                                                    />
                                                 </Box>
                                             </Box>
                                         </Box>
@@ -182,15 +240,32 @@ export function Papers() {
                                     <CardActions>
                                         <Button
                                             size="small"
-                                            startIcon={savedPapers.includes(paper.id) ? <Bookmark /> : <BookmarkBorder />}
-                                            onClick={() => toggleSave(paper.id)}
+                                            startIcon={
+                                                savedPapers.includes(
+                                                    paper.id
+                                                ) ? (
+                                                    <Bookmark />
+                                                ) : (
+                                                    <BookmarkBorder />
+                                                )
+                                            }
+                                            onClick={() =>
+                                                toggleSave(paper.id)
+                                            }
                                         >
-                                            {savedPapers.includes(paper.id) ? 'Sačuvano' : 'Sačuvaj'}
+                                            {savedPapers.includes(paper.id)
+                                                ? 'Sačuvano'
+                                                : 'Sačuvaj'}
                                         </Button>
                                         <Button
                                             size="small"
                                             startIcon={<Download />}
-                                            onClick={() => window.open(paper.document_url, '_blank')}
+                                            onClick={() =>
+                                                window.open(
+                                                    paper.document_url,
+                                                    '_blank'
+                                                )
+                                            }
                                         >
                                             Preuzmi PDF
                                         </Button>
@@ -201,17 +276,20 @@ export function Papers() {
                     </Grid>
 
                     {papers.length === 0 && (
-                        <Box textAlign="center" py={4}>
-                            <Typography variant="h6" color="text.secondary">
-                                Nema rezultata pretrage
-                            </Typography>
-                        </Box>
+                        <EmptyState
+                            title="Nema rezultata pretrage"
+                            subtitle="Pokušajte sa drugim pojmovima ili kategorijama."
+                        />
                     )}
 
                     {hasMore && papers.length > 0 && (
                         <Box textAlign="center" py={4}>
-                            <Button variant="outlined" onClick={handleLoadMore} disabled={loading}>
-                                {loading ? "Učitavanje..." : "Učitaj još"}
+                            <Button
+                                variant="outlined"
+                                onClick={handleLoadMore}
+                                disabled={loading}
+                            >
+                                {loading ? 'Učitavanje...' : 'Učitaj još'}
                             </Button>
                         </Box>
                     )}

@@ -38,6 +38,15 @@ export function Register() {
         setError('');
         setLoading(true);
 
+        // ✅ FIX: kombinujemo firstName i lastName u name
+        const name = `${firstName.trim()} ${lastName.trim()}`;
+
+        if (!firstName.trim() || !lastName.trim()) {
+            setError('Ime i prezime su obavezni.');
+            setLoading(false);
+            return;
+        }
+
         const payload = { name, email, password, role };
 
         axiosClient.post('/register', payload)
