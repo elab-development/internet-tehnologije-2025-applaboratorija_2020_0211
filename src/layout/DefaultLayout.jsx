@@ -31,6 +31,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import LogoutIcon from '@mui/icons-material/Logout';
 import FlagIcon from '@mui/icons-material/Flag';
 import PersonIcon from '@mui/icons-material/Person';
+import BarChartIcon from '@mui/icons-material/BarChart';  // NOVO (Commit 3)
 
 import { useStateContext } from "../context/ContextProvider.jsx";
 
@@ -46,6 +47,7 @@ const iconMap = {
     samples: BiotechIcon,       // NOVO
     reports: FlagIcon,          // NOVO
     profile: PersonIcon,        // NOVO
+    statistics: BarChartIcon,   // NOVO (Commit 3)
     users: PeopleIcon
 };
 
@@ -72,6 +74,7 @@ export function DefaultLayout() {
         { id: 'experiments', label: 'Eksperimenti', roles: ['researcher'], path: `/autenticate/${user?.role}/experiments` },
         { id: 'samples', label: 'Uzorci', roles: ['researcher'], path: `/autenticate/${user?.role}/samples` },  // NOVO – SK24, SK25
         { id: 'equipment', label: 'Oprema', roles: ['researcher'], path: `/autenticate/${user?.role}/equipment` },
+        { id: 'statistics', label: 'Statistike', roles: ['admin', 'researcher'], path: `/autenticate/${user?.role}/statistics` }, // NOVO (Commit 3)
         { id: 'reports', label: 'Prijave', roles: ['admin'], path: `/autenticate/${user?.role}/reports` },     // NOVO – SK17
         { id: 'profile', label: 'Moj profil', roles: ['admin', 'researcher', 'user'], path: `/autenticate/${user?.role}/profile` }, // NOVO – SK10
     ];

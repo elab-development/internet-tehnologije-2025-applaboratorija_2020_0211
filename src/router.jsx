@@ -17,6 +17,7 @@ import { Experiments } from './pages/Experiments.jsx';
 import { Samples } from './pages/Samples.jsx';           // NOVO
 import { Profile } from './pages/Profile.jsx';           // NOVO
 import { Reports } from './pages/Reports.jsx';           // NOVO
+import { Statistics } from './pages/Statistics.jsx';     // NOVO (Commit 3)
 
 const router = createBrowserRouter([
     {
@@ -63,6 +64,7 @@ const router = createBrowserRouter([
                             { path: 'equipment', element: <Equipment /> },
                             { path: 'samples', element: <Samples /> },        // SK24, SK25
                             { path: 'profile', element: <Profile /> },        // SK10
+                            { path: 'statistics', element: <Statistics /> },  // Commit 3
                         ],
                     },
 
@@ -75,6 +77,7 @@ const router = createBrowserRouter([
                             { path: 'papers/:id', element: <PaperDetail /> }, // SK5
                             { path: 'reports', element: <Reports /> },         // SK17
                             { path: 'profile', element: <Profile /> },         // SK10
+                            { path: 'statistics', element: <Statistics /> },   // Commit 3
                         ],
                     },
                 ],
