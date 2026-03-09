@@ -18,17 +18,25 @@ export function SavedPapers() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        let isMounted = true;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
         axiosClient
             .get('/favorites')
             .then(({ data }) => {
-                setFavorites(data.favorites || []);
+                if (isMounted) setFavorites(data.favorites || []);
             })
             .catch((err) => {
-                console.error('Failed to fetch favorites:', err);
-                setFavorites([]);
+                if (isMounted) {
+                    console.error('Failed to fetch favorites:', err);
+                    setFavorites([]);
+                }
             })
-            .finally(() => setLoading(false));
+            .finally(() => {
+                if (isMounted) setLoading(false);
+            });
+
+        return () => { isMounted = false; };
     }, []);
 
     if (loading) {

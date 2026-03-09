@@ -46,7 +46,6 @@ export function Projects() {
         id: null,
     });
 
-    const [errors, setErrors] = useState({});
     const getStatusColor = (status) => {
         switch (status) {
             case 'planned': return 'warning';   // Žuta/Narandžasta
@@ -103,7 +102,6 @@ export function Projects() {
     }, []);
 
     const handleOpenDialog = (project = null) => {
-        setErrors({});
         setEditingProject(project);
         if (project) {
             setFormData({
@@ -138,11 +136,9 @@ export function Projects() {
     const handleCloseDialog = () => {
         setOpenDialog(false);
         setEditingProject(null);
-        setErrors({});
     };
 
     const handleSave = async () => {
-        setErrors({});
         try {
             const payload = new FormData();
 
@@ -170,12 +166,8 @@ export function Projects() {
             fetchProjects();
             handleCloseDialog();
         } catch (err) {
-            if (err.response && (err.response.status === 422 || err.response.status === 400)) {
-                setErrors(err.response.data);
-            } else {
-                console.error("Save project failed:", err);
-                alert('Greška na serveru.');
-            }
+            console.error("Save project failed:", err);
+            alert('Greška na serveru.');
         }
     };
 

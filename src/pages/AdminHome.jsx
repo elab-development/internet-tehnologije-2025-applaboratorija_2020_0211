@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     Box,
     Grid,
@@ -58,24 +58,26 @@ export function AdminHome() {
     const [usersPage, setUsersPage] = useState(1);
     const [usersTotalPages, setUsersTotalPages] = useState(1);
 
-    const fetchEquipment = async (page = 1) => {
+    const fetchEquipment = useCallback(async (page = 1) => {
         const res = await axiosClient.get(`/equipment?page=${page}`);
         setEquipment(res.data.data);
         setEquipmentPage(res.data.current_page);
         setEquipmentTotalPages(res.data.last_page);
-    };
+    }, []);
 
-    const fetchUsers = async (page = 1) => {
+    const fetchUsers = useCallback(async (page = 1) => {
         const res = await axiosClient.get(`/users?page=${page}`);
         setUsers(res.data.data);
         setUsersPage(res.data.current_page);
         setUsersTotalPages(res.data.last_page);
-    };
+    }, []);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchEquipment();
+         
         fetchUsers();
-    }, []);
+    }, [fetchEquipment, fetchUsers]);
 
     const handleSaveEquipment = async () => {
         if (editingEquipment) {

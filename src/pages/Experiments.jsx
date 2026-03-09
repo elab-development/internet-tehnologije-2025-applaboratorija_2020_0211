@@ -15,7 +15,7 @@ import {
     IconButton,
 } from '@mui/material';
 import { Science, Add, Edit } from '@mui/icons-material';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { PageHeader, EmptyState } from '../components/index.js';
 import axiosClient from '../axiosClient.js';
 
@@ -44,20 +44,22 @@ export function Experiments() {
             project_id: '',
         });
 
-    const fetchExperiments = async () => {
+    const fetchExperiments = useCallback(async () => {
         const res = await axiosClient.get('/experiments');
         setExperiments(res.data.data);
-    };
+    }, []);
 
-    const fetchProjects = async () => {
+    const fetchProjects = useCallback(async () => {
         const res = await axiosClient.get('/projects');
         setProjects(res.data.data);
-    };
+    }, []);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchExperiments();
+         
         fetchProjects();
-    }, []);
+    }, [fetchExperiments, fetchProjects]);
 
     // Otvori modal za kreiranje
     const handleOpenCreate = () => {

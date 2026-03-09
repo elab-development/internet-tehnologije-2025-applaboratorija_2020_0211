@@ -14,7 +14,7 @@ import {
     Typography,
 } from '@mui/material';
 import { Build, Add, Delete } from '@mui/icons-material';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { PageHeader, EmptyState } from '../components/index.js';
 import axiosClient from '../axiosClient.js';
 
@@ -32,36 +32,30 @@ export function Equipment() {
     });
     const [projects, setProjects] = useState([]);
 
-    const fetchProjects = async () => {
+    const fetchProjects = useCallback(async () => {
         const res = await axiosClient.get('/projects');
         setProjects(res.data.data);
-    };
+    }, []);
 
-    const fetchEquipment = async () => {
+    const fetchEquipment = useCallback(async () => {
         const res = await axiosClient.get('/equipment');
         setEquipment(res.data.data);
-    };
+    }, []);
 
-    const fetchReservations = async () => {
+    const fetchReservations = useCallback(async () => {
         const res = await axiosClient.get('/reservations');
         console.log(res.data.data);
         setReservations(res.data.data);
-    };
-
-    useEffect(() => {
-        fetchEquipment();
-        fetchReservations();
-        fetchProjects();
     }, []);
 
-    const isReserved = (equipmentId) =>
-        reservations.some((r) => r.equipment.id === equipmentId);
-
-    const getStatusColor = (equipmentId) =>
-        isReserved(equipmentId) ? 'warning' : 'success';
-
-    const getStatusLabel = (equipmentId) =>
-        isReserved(equipmentId) ? 'Rezervisano' : 'Dostupno';
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        fetchEquipment();
+         
+        fetchReservations();
+         
+        fetchProjects();
+    }, [fetchEquipment, fetchReservations, fetchProjects]);
 
     const handleAddReservation = async () => {
         if (!form.project_id) {

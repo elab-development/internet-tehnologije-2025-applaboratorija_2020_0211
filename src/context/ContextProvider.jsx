@@ -1,13 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axiosClient from "../axiosClient.js";
-
-const StateContext = createContext({
-    user: null,
-    token: null,
-    loading: false,
-    setUser: () => {},
-    setToken: () => {},
-});
+import { StateContext } from "./useStateContext.js";
 
 export const ContextProvider = ({ children }) => {
     const [user, _setUser] = useState(null);
@@ -26,17 +19,25 @@ export const ContextProvider = ({ children }) => {
     useEffect(() => {
         if (!token) return;
 
+        let isMounted = true;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
         axiosClient.get("/me")
             .then(({ data }) => {
-                setUser(data.user ?? data);
+                if (isMounted) setUser(data.user ?? data);
             })
             .catch((err) => {
-                console.error("Fetch /me failed:", err);
-                setToken(null);
-                setUser(null);
+                if (isMounted) {
+                    console.error("Fetch /me failed:", err);
+                    setToken(null);
+                    setUser(null);
+                }
             })
-            .finally(() => setLoading(false));
+            .finally(() => {
+                if (isMounted) setLoading(false);
+            });
+
+        return () => { isMounted = false; };
     }, [token, setUser, setToken]);
 
     return (
@@ -51,5 +52,3 @@ export const ContextProvider = ({ children }) => {
         </StateContext.Provider>
     );
 };
-
-export const useStateContext = () => useContext(StateContext);
