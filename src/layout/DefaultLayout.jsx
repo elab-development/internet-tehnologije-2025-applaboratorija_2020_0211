@@ -29,6 +29,8 @@ import ScienceIcon from '@mui/icons-material/Science';
 import BiotechIcon from '@mui/icons-material/Biotech';
 import PeopleIcon from '@mui/icons-material/People';
 import LogoutIcon from '@mui/icons-material/Logout';
+import FlagIcon from '@mui/icons-material/Flag';
+import PersonIcon from '@mui/icons-material/Person';
 
 import { useStateContext } from "../context/ContextProvider.jsx";
 
@@ -41,6 +43,9 @@ const iconMap = {
     projects: FolderIcon,
     experiments: ScienceIcon,
     equipment: BiotechIcon,
+    samples: BiotechIcon,       // NOVO
+    reports: FlagIcon,          // NOVO
+    profile: PersonIcon,        // NOVO
     users: PeopleIcon
 };
 
@@ -61,11 +66,14 @@ export function DefaultLayout() {
 
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', roles: ['admin', 'researcher', 'user'], path: `/autenticate/${user?.role}` },
-        { id: 'papers', label: 'Naučni radovi', roles: [ 'researcher', 'user'], path: `/autenticate/${user?.role}/papers` },
+        { id: 'papers', label: 'Naučni radovi', roles: ['admin', 'researcher', 'user'], path: `/autenticate/${user?.role}/papers` },
         { id: 'saved-papers', label: 'Sačuvani radovi', roles: ['researcher', 'user'], path: `/autenticate/${user?.role}/saved-papers` },
-        { id: 'projects', label: 'Projekti', roles: [ 'researcher', ], path: `/autenticate/${user?.role}/projects` },
-        { id: 'experiments', label: 'Eksperimenti', roles: [ 'researcher'], path: `/autenticate/${user?.role}/experiments` },
-        { id: 'equipment', label: 'Oprema', roles: [ 'researcher',], path: `/autenticate/${user?.role}/equipment` },
+        { id: 'projects', label: 'Projekti', roles: ['researcher'], path: `/autenticate/${user?.role}/projects` },
+        { id: 'experiments', label: 'Eksperimenti', roles: ['researcher'], path: `/autenticate/${user?.role}/experiments` },
+        { id: 'samples', label: 'Uzorci', roles: ['researcher'], path: `/autenticate/${user?.role}/samples` },  // NOVO – SK24, SK25
+        { id: 'equipment', label: 'Oprema', roles: ['researcher'], path: `/autenticate/${user?.role}/equipment` },
+        { id: 'reports', label: 'Prijave', roles: ['admin'], path: `/autenticate/${user?.role}/reports` },     // NOVO – SK17
+        { id: 'profile', label: 'Moj profil', roles: ['admin', 'researcher', 'user'], path: `/autenticate/${user?.role}/profile` }, // NOVO – SK10
     ];
 
     const visibleMenuItems = menuItems.filter((item) =>

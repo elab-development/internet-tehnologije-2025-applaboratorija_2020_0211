@@ -22,6 +22,7 @@ import {
     ListItemText,
     OutlinedInput, Divider, Container
 } from '@mui/material';
+import { ConfirmDialog } from '../components/index.js';
 import axiosClient from '../axiosClient.js';
 
 const statusOptions = [
@@ -38,6 +39,12 @@ export function Projects() {
     const [openDialog, setOpenDialog] = useState(false);
     const [editingProject, setEditingProject] = useState(null);
     const [users, setUsers] = useState([]);
+
+    // SK9 – ConfirmDialog state za brisanje
+    const [confirmDelete, setConfirmDelete] = useState({
+        open: false,
+        id: null,
+    });
 
     const [errors, setErrors] = useState({});
     const getStatusColor = (status) => {
@@ -186,6 +193,18 @@ export function Projects() {
         return Math.round((elapsed / total) * 100);
     };
 
+    // SK9 – Brisanje projekta
+    const handleConfirmDelete = async () => {
+        try {
+            await axiosClient.delete(`/projects/${confirmDelete.id}`);
+            setConfirmDelete({ open: false, id: null });
+            fetchProjects();
+        } catch (err) {
+            console.error('Delete project failed:', err);
+            alert('Greška pri brisanju projekta.');
+        }
+    };
+
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
             {/* HEADER SEKCIJA - Ostavljamo konzistentno */}
@@ -263,7 +282,19 @@ export function Projects() {
                                         <Box display="flex" gap={1}>
                                             {project.members?.map(m => <Chip key={m.id} label={m.name} size="small" />)}
                                         </Box>
-                                        <Button variant="outlined" onClick={() => handleOpenDialog(project)}>UREDI</Button>
+                                        <Box display="flex" gap={1} alignItems="center">
+                                            <Button variant="outlined" onClick={() => handleOpenDialog(project)}>UREDI</Button>
+                                            {/* SK9 – Brisanje rada */}
+                                            <Button
+                                                variant="outlined"
+                                                color="error"
+                                                onClick={() =>
+                                                    setConfirmDelete({ open: true, id: project.id })
+                                                }
+                                            >
+                                                OBRIŠI
+                                            </Button>
+                                        </Box>
                                     </Box>
                                 </CardContent>
                             </Card>
@@ -388,6 +419,15 @@ export function Projects() {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* SK9 – ConfirmDialog za brisanje */}
+            <ConfirmDialog
+                open={confirmDelete.open}
+                title="Brisanje projekta"
+                message="Da li ste sigurni da želite da obrišete ovaj projekat? Svi eksperimenti i uzorci vezani za projekat biće obrisani."
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setConfirmDelete({ open: false, id: null })}
+            />
         </Container>
     );
 }

@@ -45,6 +45,13 @@ export function AdminHome() {
         id: null,
     });
 
+    // SK11 – Dialog state za izmenu uloge korisnika
+    const [editUserDialog, setEditUserDialog] = useState({
+        open: false,
+        user: null,
+    });
+    const [newRole, setNewRole] = useState('user');
+
     // Paginacija
     const [equipmentPage, setEquipmentPage] = useState(1);
     const [equipmentTotalPages, setEquipmentTotalPages] = useState(1);
@@ -103,6 +110,19 @@ export function AdminHome() {
         await axiosClient.delete(`/users/${confirmUser.id}`);
         setConfirmUser({ open: false, id: null });
         fetchUsers();
+    };
+
+    // SK11 – Čuvanje nove uloge korisnika
+    const handleSaveUserRole = async () => {
+        try {
+            await axiosClient.put(`/users/${editUserDialog.user.id}`, {
+                role: newRole,
+            });
+            setEditUserDialog({ open: false, user: null });
+            fetchUsers();
+        } catch (err) {
+            console.error('Update role failed:', err);
+        }
     };
 
     const handleEditEquipment = (eq) => {
@@ -241,18 +261,30 @@ export function AdminHome() {
                                         {user.email} • {user.role}
                                     </Typography>
                                 </Box>
-                                {/* ✅ ConfirmDialog za brisanje korisnika */}
-                                <IconButton
-                                    color="error"
-                                    onClick={() =>
-                                        setConfirmUser({
-                                            open: true,
-                                            id: user.id,
-                                        })
-                                    }
-                                >
-                                    <Delete />
-                                </IconButton>
+                                <Box display="flex" gap={1}>
+                                    {/* SK11 – Edit role dugme */}
+                                    <IconButton
+                                        color="primary"
+                                        onClick={() => {
+                                            setEditUserDialog({ open: true, user });
+                                            setNewRole(user.role);
+                                        }}
+                                    >
+                                        <Edit />
+                                    </IconButton>
+                                    {/* ✅ ConfirmDialog za brisanje korisnika */}
+                                    <IconButton
+                                        color="error"
+                                        onClick={() =>
+                                            setConfirmUser({
+                                                open: true,
+                                                id: user.id,
+                                            })
+                                        }
+                                    >
+                                        <Delete />
+                                    </IconButton>
+                                </Box>
                             </CardContent>
                         </Card>
                     ))
@@ -388,6 +420,44 @@ export function AdminHome() {
                 onConfirm={handleConfirmDeleteUser}
                 onCancel={() => setConfirmUser({ open: false, id: null })}
             />
+
+            {/* SK11 – Dialog za izmenu uloge korisnika */}
+            <Dialog
+                open={editUserDialog.open}
+                onClose={() => setEditUserDialog({ open: false, user: null })}
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogTitle>
+                    Izmeni ulogu – {editUserDialog.user?.name}
+                </DialogTitle>
+                <DialogContent>
+                    <TextField
+                        select
+                        label="Uloga"
+                        fullWidth
+                        margin="normal"
+                        value={newRole}
+                        onChange={(e) => setNewRole(e.target.value)}
+                    >
+                        <MenuItem value="user">User – Korisnik</MenuItem>
+                        <MenuItem value="researcher">Researcher – Istraživač</MenuItem>
+                        <MenuItem value="admin">Admin – Administrator</MenuItem>
+                    </TextField>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() =>
+                            setEditUserDialog({ open: false, user: null })
+                        }
+                    >
+                        Otkaži
+                    </Button>
+                    <Button variant="contained" onClick={handleSaveUserRole}>
+                        Sačuvaj
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }

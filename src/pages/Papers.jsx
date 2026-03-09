@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Box,
+    Typography,
     TextField,
     Grid,
     Card,
@@ -14,13 +16,25 @@ import {
     FormControl,
     InputLabel,
     CircularProgress,
-    Typography,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Alert,
 } from '@mui/material';
-import { Search, Bookmark, BookmarkBorder, Download } from '@mui/icons-material';
-import { PageHeader, EmptyState, SortSelect } from '../components/index.js';
+import {
+    Search,
+    Bookmark,
+    BookmarkBorder,
+    Download,
+    Flag,
+    OpenInNew,
+} from '@mui/icons-material';
+import { PageHeader, SortSelect } from '../components/index.js';
 import axiosClient from '../axiosClient.js';
+import { useStateContext } from '../context/ContextProvider.jsx';
 
-const fields = [
+const CATEGORY_OPTIONS = [
     'IT',
     'Medicine',
     'Biology',
@@ -30,100 +44,151 @@ const fields = [
     'Engineering',
 ];
 
+// SK13 – opcije sortiranja
+const SORT_OPTIONS = [
+    { value: 'title_asc', label: 'Naziv (A–Z)' },
+    { value: 'title_desc', label: 'Naziv (Z–A)' },
+    { value: 'date_desc', label: 'Najnoviji' },
+    { value: 'date_asc', label: 'Najstariji' },
+    { value: 'budget_desc', label: 'Budžet (↓)' },
+    { value: 'budget_asc', label: 'Budžet (↑)' },
+];
+
 export function Papers() {
+    const navigate = useNavigate();
+    const { user } = useStateContext();
+
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedField, setSelectedField] = useState('all');
+    const [sortBy, setSortBy] = useState('date_desc'); // SK13
     const [savedPapers, setSavedPapers] = useState([]);
-
     const [papers, setPapers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
 
+    // SK16 – Report dialog state
+    const [reportDialog, setReportDialog] = useState({
+        open: false,
+        projectId: null,
+        projectTitle: '',
+    });
+    const [reportDesc, setReportDesc] = useState('');
+    const [reportLoading, setReportLoading] = useState(false);
+    const [reportSuccess, setReportSuccess] = useState(false);
+    const [reportError, setReportError] = useState('');
+
+    // Dohvati sačuvane radove jednom
     useEffect(() => {
-        // Fetch favorites once
         axiosClient
             .get('/favorites')
             .then(({ data }) => {
-                const favoriteProjectIds = data.favorites.map(
-                    (fav) => fav.project.id
-                );
-                setSavedPapers(favoriteProjectIds);
+                const ids = data.favorites.map((f) => f.project.id);
+                setSavedPapers(ids);
             })
-            .catch((err) => console.error('Fetch favorites failed:', err));
+            .catch(console.error);
     }, []);
 
-    // Fetch papers when searchTerm, selectedField or page changes
+    // Reset stranice kad se menja pretraga/filter/sort
+    useEffect(() => {
+        setPage(1);
+        setPapers([]);
+    }, [searchTerm, selectedField, sortBy]);
+
+    // Dohvati radove
     useEffect(() => {
         setLoading(true);
-
         axiosClient
             .get('/projects/search', {
                 params: {
                     q: searchTerm || undefined,
                     category:
                         selectedField !== 'all' ? selectedField : undefined,
-                    page: page,
+                    sort: sortBy,
+                    page,
                 },
             })
             .then(({ data }) => {
-                if (page === 1) {
-                    setPapers(data.data);
-                } else {
-                    setPapers((prev) => [...prev, ...data.data]);
-                }
+                setPapers((prev) =>
+                    page === 1
+                        ? data.data
+                        : [...prev, ...data.data]
+                );
                 setHasMore(data.data.length > 0);
             })
             .catch((err) => {
-                console.error('Fetch projects failed:', err);
+                console.error('Fetch papers failed:', err);
                 if (page === 1) setPapers([]);
                 setHasMore(false);
             })
             .finally(() => setLoading(false));
-    }, [searchTerm, selectedField, page]);
+    }, [searchTerm, selectedField, sortBy, page]);
 
-    const toggleSave = (projectId) => {
-        const isSaved = savedPapers.includes(projectId);
+    // SK6 – toggle save
+    const toggleSave = useCallback(
+        (projectId) => {
+            const isSaved = savedPapers.includes(projectId);
+            if (isSaved) {
+                axiosClient
+                    .delete('/favorites', { data: { project_id: projectId } })
+                    .then(() =>
+                        setSavedPapers((prev) =>
+                            prev.filter((id) => id !== projectId)
+                        )
+                    )
+                    .catch(console.error);
+            } else {
+                axiosClient
+                    .post('/favorites', { project_id: projectId })
+                    .then(() =>
+                        setSavedPapers((prev) => [...prev, projectId])
+                    )
+                    .catch(console.error);
+            }
+        },
+        [savedPapers]
+    );
 
-        if (isSaved) {
-            axiosClient
-                .delete('/favorites', { data: { project_id: projectId } })
-                .then(() => {
-                    setSavedPapers((prev) =>
-                        prev.filter((id) => id !== projectId)
-                    );
-                })
-                .catch((err) => console.error('Remove favorite failed:', err));
-        } else {
-            axiosClient
-                .post('/favorites', { project_id: projectId })
-                .then(() => {
-                    setSavedPapers((prev) => [...prev, projectId]);
-                })
-                .catch((err) => console.error('Add favorite failed:', err));
+    // SK16 – submit report
+    const handleSubmitReport = async () => {
+        if (!reportDesc.trim()) {
+            setReportError('Opis problema je obavezan.');
+            return;
+        }
+        setReportLoading(true);
+        setReportError('');
+        try {
+            await axiosClient.post('/reports', {
+                project_id: reportDialog.projectId,
+                description: reportDesc.trim(),
+            });
+            setReportSuccess(true);
+            setTimeout(() => {
+                setReportDialog({ open: false, projectId: null, projectTitle: '' });
+                setReportDesc('');
+                setReportSuccess(false);
+            }, 1500);
+        } catch (err) {
+            setReportError(
+                err.response?.data?.message || 'Greška pri slanju prijave.'
+            );
+        } finally {
+            setReportLoading(false);
         }
     };
 
-    const handleLoadMore = () => {
-        if (hasMore) setPage((prev) => prev + 1);
-    };
-
-    // Reset page to 1 kad se menja search ili kategorija
-    useEffect(() => {
-        setPage(1);
-    }, [searchTerm, selectedField]);
-
     return (
         <Box>
-            {/* ✅ PageHeader */}
             <PageHeader
                 title="Naučni radovi"
-                subtitle="Pretražite i filtrirajte naučne radove po različitim kriterijumima"
+                subtitle="Pretražite i filtrirajte naučne radove po različitim kriterijumima."
             />
 
+            {/* ===== FILTERI I SORTIRANJE ===== */}
             <Box sx={{ mb: 4 }}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} md={8}>
+                <Grid container spacing={2} alignItems="center">
+                    {/* Pretraga */}
+                    <Grid item xs={12} md={5}>
                         <TextField
                             fullWidth
                             placeholder="Pretraži po naslovu ili kategoriji..."
@@ -138,6 +203,8 @@ export function Papers() {
                             }}
                         />
                     </Grid>
+
+                    {/* Filter kategorije */}
                     <Grid item xs={12} md={4}>
                         <FormControl fullWidth>
                             <InputLabel>Kategorija</InputLabel>
@@ -148,14 +215,27 @@ export function Papers() {
                                     setSelectedField(e.target.value)
                                 }
                             >
-                                <MenuItem value="all">Sve kategorije</MenuItem>
-                                {fields.map((field) => (
-                                    <MenuItem key={field} value={field}>
-                                        {field}
+                                <MenuItem value="all">
+                                    Sve kategorije
+                                </MenuItem>
+                                {CATEGORY_OPTIONS.map((f) => (
+                                    <MenuItem key={f} value={f}>
+                                        {f}
                                     </MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
+                    </Grid>
+
+                    {/* SK13 – Sort select */}
+                    <Grid item xs={12} md={3}>
+                        <SortSelect
+                            label="Sortiraj po"
+                            value={sortBy}
+                            onChange={setSortBy}
+                            options={SORT_OPTIONS}
+                            size="medium"
+                        />
                     </Grid>
                 </Grid>
             </Box>
@@ -179,17 +259,18 @@ export function Papers() {
                     <Grid container spacing={3}>
                         {papers.map((paper) => (
                             <Grid item xs={12} key={paper.id}>
-                                <Card>
+                                <Card sx={{ borderRadius: 3 }}>
                                     <CardContent>
                                         <Box
                                             display="flex"
                                             justifyContent="space-between"
-                                            alignItems="start"
+                                            alignItems="flex-start"
                                         >
                                             <Box flex={1}>
                                                 <Typography
                                                     variant="h6"
                                                     gutterBottom
+                                                    fontWeight={600}
                                                 >
                                                     {paper.title}
                                                 </Typography>
@@ -198,7 +279,7 @@ export function Papers() {
                                                     color="text.secondary"
                                                     gutterBottom
                                                 >
-                                                    {paper.leader.name}
+                                                    {paper.leader?.name}
                                                 </Typography>
                                                 <Typography
                                                     variant="body2"
@@ -220,9 +301,7 @@ export function Papers() {
                                                         sx={{ mr: 1 }}
                                                     />
                                                     <Chip
-                                                        label={
-                                                            paper.budget + ' $'
-                                                        }
+                                                        label={`${paper.budget} $`}
                                                         size="small"
                                                         variant="outlined"
                                                         sx={{ mr: 1 }}
@@ -231,23 +310,32 @@ export function Papers() {
                                                         label={paper.status}
                                                         size="small"
                                                         variant="outlined"
-                                                        sx={{ mr: 1 }}
                                                     />
                                                 </Box>
                                             </Box>
                                         </Box>
                                     </CardContent>
                                     <CardActions>
+                                        {/* SK5 – Detalji */}
+                                        <Button
+                                            size="small"
+                                            startIcon={<OpenInNew />}
+                                            onClick={() =>
+                                                navigate(
+                                                    `/autenticate/${user?.role}/papers/${paper.id}`
+                                                )
+                                            }
+                                        >
+                                            Detalji
+                                        </Button>
+
+                                        {/* SK6 – Save/Unsave */}
                                         <Button
                                             size="small"
                                             startIcon={
-                                                savedPapers.includes(
-                                                    paper.id
-                                                ) ? (
-                                                    <Bookmark />
-                                                ) : (
-                                                    <BookmarkBorder />
-                                                )
+                                                savedPapers.includes(paper.id)
+                                                    ? <Bookmark />
+                                                    : <BookmarkBorder />
                                             }
                                             onClick={() =>
                                                 toggleSave(paper.id)
@@ -257,6 +345,8 @@ export function Papers() {
                                                 ? 'Sačuvano'
                                                 : 'Sačuvaj'}
                                         </Button>
+
+                                        {/* SK12 – Download */}
                                         <Button
                                             size="small"
                                             startIcon={<Download />}
@@ -266,9 +356,31 @@ export function Papers() {
                                                     '_blank'
                                                 )
                                             }
+                                            disabled={!paper.document_url}
                                         >
-                                            Preuzmi PDF
+                                            PDF
                                         </Button>
+
+                                        {/* SK16 – Prijavi problem */}
+                                        {user?.role !== 'admin' && (
+                                            <Button
+                                                size="small"
+                                                color="warning"
+                                                startIcon={<Flag />}
+                                                onClick={() => {
+                                                    setReportDialog({
+                                                        open: true,
+                                                        projectId: paper.id,
+                                                        projectTitle: paper.title,
+                                                    });
+                                                    setReportDesc('');
+                                                    setReportError('');
+                                                    setReportSuccess(false);
+                                                }}
+                                            >
+                                                Prijavi
+                                            </Button>
+                                        )}
                                     </CardActions>
                                 </Card>
                             </Grid>
@@ -276,17 +388,21 @@ export function Papers() {
                     </Grid>
 
                     {papers.length === 0 && (
-                        <EmptyState
-                            title="Nema rezultata pretrage"
-                            subtitle="Pokušajte sa drugim pojmovima ili kategorijama."
-                        />
+                        <Box textAlign="center" py={4}>
+                            <Typography
+                                variant="h6"
+                                color="text.secondary"
+                            >
+                                Nema rezultata pretrage
+                            </Typography>
+                        </Box>
                     )}
 
                     {hasMore && papers.length > 0 && (
                         <Box textAlign="center" py={4}>
                             <Button
                                 variant="outlined"
-                                onClick={handleLoadMore}
+                                onClick={() => setPage((p) => p + 1)}
                                 disabled={loading}
                             >
                                 {loading ? 'Učitavanje...' : 'Učitaj još'}
@@ -295,6 +411,75 @@ export function Papers() {
                     )}
                 </>
             )}
+
+            {/* SK16 – Report dialog */}
+            <Dialog
+                open={reportDialog.open}
+                onClose={() =>
+                    setReportDialog({
+                        open: false,
+                        projectId: null,
+                        projectTitle: '',
+                    })
+                }
+                fullWidth
+                maxWidth="sm"
+            >
+                <DialogTitle>
+                    Prijavi problem: {reportDialog.projectTitle}
+                </DialogTitle>
+                <DialogContent>
+                    {reportSuccess ? (
+                        <Alert severity="success">
+                            Prijava uspešno poslata!
+                        </Alert>
+                    ) : (
+                        <>
+                            {reportError && (
+                                <Alert severity="error" sx={{ mb: 2 }}>
+                                    {reportError}
+                                </Alert>
+                            )}
+                            <TextField
+                                label="Opis problema"
+                                fullWidth
+                                multiline
+                                rows={4}
+                                sx={{ mt: 1 }}
+                                value={reportDesc}
+                                onChange={(e) =>
+                                    setReportDesc(e.target.value)
+                                }
+                                placeholder="Opišite zašto prijavljivate ovaj rad..."
+                                required
+                            />
+                        </>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() =>
+                            setReportDialog({
+                                open: false,
+                                projectId: null,
+                                projectTitle: '',
+                            })
+                        }
+                    >
+                        Zatvori
+                    </Button>
+                    {!reportSuccess && (
+                        <Button
+                            variant="contained"
+                            color="warning"
+                            onClick={handleSubmitReport}
+                            disabled={reportLoading}
+                        >
+                            {reportLoading ? 'Slanje...' : 'Pošalji'}
+                        </Button>
+                    )}
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }
