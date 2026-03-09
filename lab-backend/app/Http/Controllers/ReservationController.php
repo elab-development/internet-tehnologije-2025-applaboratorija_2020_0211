@@ -10,6 +10,17 @@ use Illuminate\Http\Request;
 
 class ReservationController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/reservations",
+     *     summary="Pregled rezervacija opreme",
+     *     tags={"Rezervacije"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="equipment_id", in="query", description="Filter po ID-ju opreme", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="status", in="query", description="Filter po statusu", required=false, @OA\Schema(type="string", enum={"pending", "approved", "rejected", "completed", "cancelled"})),
+     *     @OA\Response(response=200, description="Lista rezervacija sa paginacijom")
+     * )
+     */
     public function index(Request $request)
     {
         $reservations = Reservation::with('equipment', 'project', 'user')
@@ -21,6 +32,28 @@ class ReservationController extends Controller
         return ReservationResource::collection($reservations);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/reservations",
+     *     summary="Kreiranje nove rezervacije (Researcher/Admin)",
+     *     tags={"Rezervacije"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"start_time", "end_time", "purpose", "status", "equipment_id", "project_id"},
+     *             @OA\Property(property="start_time", type="string", example="2025-06-01 10:00"),
+     *             @OA\Property(property="end_time", type="string", example="2025-06-01 12:00"),
+     *             @OA\Property(property="purpose", type="string", example="Korišćenje mikroskopa za projekat X"),
+     *             @OA\Property(property="status", type="string", enum={"pending", "approved", "rejected", "completed", "cancelled"}, example="pending"),
+     *             @OA\Property(property="equipment_id", type="integer", example=1),
+     *             @OA\Property(property="project_id", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Rezervacija uspešno kreirana"),
+     *     @OA\Response(response=422, description="Greška u validaciji ili je oprema zauzeta/nedostupna")
+     * )
+     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -63,6 +96,17 @@ class ReservationController extends Controller
         return response()->json(['message' => 'Rezervacija uspešno kreirana.', 'data' => new ReservationResource($reservation)], 201);
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/reservations/{reservation}",
+     *     summary="Brisanje rezervacije (Researcher/Admin)",
+     *     tags={"Rezervacije"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="reservation", in="path", description="ID rezervacije", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Rezervacija obrisana"),
+     *     @OA\Response(response=403, description="Zabranjen pristup")
+     * )
+     */
     public function destroy(Request $request, Reservation $reservation)
     {
         $this->authorize('delete', $reservation);

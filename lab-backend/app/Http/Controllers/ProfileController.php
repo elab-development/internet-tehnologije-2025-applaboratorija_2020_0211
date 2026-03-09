@@ -8,6 +8,24 @@ use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
+    /**
+     * @OA\Put(
+     *     path="/api/profile",
+     *     summary="Ažuriranje profila korisnika",
+     *     tags={"Profil"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="Novi Naziv"),
+     *             @OA\Property(property="email", type="string", format="email", example="noviemail@test.com")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Profil uspešno ažuriran"),
+     *     @OA\Response(response=401, description="Niste prijavljeni"),
+     *     @OA\Response(response=422, description="Greška pri validaciji")
+     * )
+     */
     public function update(Request $request)
     {
         $data = $request->validate([
@@ -20,6 +38,26 @@ class ProfileController extends Controller
         return response()->json(['message' => 'Profil uspešno ažuriran.', 'user' => new UserResource($request->user())]);
     }
 
+    /**
+     * @OA\Put(
+     *     path="/api/profile/password",
+     *     summary="Promena lozinke korisnika",
+     *     tags={"Profil"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"current_password", "password", "password_confirmation"},
+     *             @OA\Property(property="current_password", type="string", format="password", example="staraLozinka123!"),
+     *             @OA\Property(property="password", type="string", format="password", example="novaLozinka123!"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="novaLozinka123!")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Lozinka uspešno promenjena"),
+     *     @OA\Response(response=401, description="Niste prijavljeni"),
+     *     @OA\Response(response=422, description="Greška pri validaciji ili pogrešna trenutna lozinka")
+     * )
+     */
     public function updatePassword(Request $request)
     {
         $data = $request->validate([
