@@ -1,20 +1,20 @@
-name: CI/CD Pipeline
+name: ResearchHub CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - '**'
+    branches: [ "main", "develop" ]
   pull_request:
-    branches:
-      - '**'
+    branches: [ "main", "develop" ]
 
 jobs:
-  build-and-lint:
-    name: Install, Lint & Build
+  # 1. Frontend Testovi
+  frontend-tests:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: ./lab-front
     steps:
-      - name: Checkout repository
+      - name: Checkout repozitorijuma
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -22,19 +22,50 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: './lab-front/package-lock.json'
 
-      - name: Install dependencies
+      - name: Instalacija zavisnosti
         run: npm ci
 
-      - name: Run ESLint
-        run: npm run lint
+      - name: Pokretanje Vitest testova
+        run: npm run test:run
 
-      - name: Build project
-        run: npm run build
+  # 2. Backend Testovi
+  backend-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./lab-backend
+    steps:
+      - name: Checkout repozitorijuma
+        uses: actions/checkout@v4
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      - name: Setup PHP sa ekstenzijama
+        uses: shivammathur/setup-php@v2
         with:
-          name: dist
-          path: dist/
-          retention-days: 7
+          php-version: '8.2'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, gd
+          coverage: none
+
+      - name: Instalacija Composer zavisnosti
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Priprema .env.testing fajla
+        run: cp .env.testing .env
+
+      - name: Generisanje APP_KEY
+        run: php artisan key:generate --env=testing
+
+      - name: Pokretanje PHPUnit testova (sa SQLite in-memory bazom)
+        run: php artisan test
+
+  # 3. Provera Docker Build-a (Zavisi od prolaska testova)
+  docker-build-check:
+    needs: [frontend-tests, backend-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repozitorijuma
+        uses: actions/checkout@v4
+
+      - name: Build Docker kompozicije
+        run: docker-compose build
