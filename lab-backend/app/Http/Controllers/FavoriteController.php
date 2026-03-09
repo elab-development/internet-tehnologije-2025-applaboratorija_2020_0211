@@ -9,6 +9,15 @@ use Illuminate\Http\Request;
 
 class FavoriteController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/favorites",
+     *     summary="Pregled omiljenih projekata",
+     *     tags={"Favoriti"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Lista omiljenih projekata sa paginacijom")
+     * )
+     */
     public function index(Request $request)
     {
         $favorites = Favorite::with('project', 'project.leader')
@@ -21,6 +30,23 @@ class FavoriteController extends Controller
         return ProjectResource::collection(collect($projects));
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/favorites",
+     *     summary="Dodavanje projekta u omiljene",
+     *     tags={"Favoriti"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"project_id"},
+     *             @OA\Property(property="project_id", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Projekat dodat u omiljene"),
+     *     @OA\Response(response=422, description="Greška u validaciji ili je projekat već dodat")
+     * )
+     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -45,6 +71,23 @@ class FavoriteController extends Controller
         return response()->json(['message' => 'Projekat dodan u omiljene.', 'data' => new ProjectResource($favorite->project)], 201);
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/favorites",
+     *     summary="Uklanjanje projekta iz omiljenih",
+     *     tags={"Favoriti"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"project_id"},
+     *             @OA\Property(property="project_id", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Projekat uklonjen iz omiljenih"),
+     *     @OA\Response(response=404, description="Projekat nije pronađen u omiljenim")
+     * )
+     */
     public function destroy(Request $request)
     {
         $data = $request->validate([

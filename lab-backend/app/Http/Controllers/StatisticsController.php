@@ -13,6 +13,16 @@ use Illuminate\Http\Request;
 
 class StatisticsController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/statistics",
+     *     summary="Dohvatanje sistemskih statistika (Researcher/Admin)",
+     *     tags={"Statistike"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Statistički podaci za kontrolnu tablu"),
+     *     @OA\Response(response=403, description="Zabranjen pristup")
+     * )
+     */
     public function index(Request $request)
     {
         $stats = [

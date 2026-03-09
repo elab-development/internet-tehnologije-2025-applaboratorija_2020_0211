@@ -17,6 +17,26 @@ class AuthController extends Controller
         private EmailService $email
     ) {}
 
+    /**
+     * @OA\Post(
+     *     path="/api/register",
+     *     summary="Registracija novog korisnika",
+     *     tags={"Autentifikacija"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","email","password","role"},
+     *             @OA\Property(property="name", type="string", example="Petar Petrović"),
+     *             @OA\Property(property="email", type="string", format="email", example="petar@test.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password123"),
+     *             @OA\Property(property="role", type="string", enum={"user", "researcher"}, example="researcher"),
+     *             @OA\Property(property="recaptcha_token", type="string", example="mock-token")
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Uspešna registracija, vraća token"),
+     *     @OA\Response(response=422, description="Validaciona greška")
+     * )
+     */
     public function register(Request $request)
     {
         $data = $request->validate([
@@ -47,6 +67,23 @@ class AuthController extends Controller
         return response()->json(['token' => $token, 'user' => new UserResource($user)], 201);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/login",
+     *     summary="Prijava korisnika u sistem",
+     *     tags={"Autentifikacija"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email","password"},
+     *             @OA\Property(property="email", type="string", format="email", example="admin@researchhub.app"),
+     *             @OA\Property(property="password", type="string", format="password", example="password123")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Uspešna prijava, vraća token"),
+     *     @OA\Response(response=401, description="Pogrešni kredencijali")
+     * )
+     */
     public function login(Request $request)
     {
         $data = $request->validate([
@@ -78,12 +115,31 @@ class AuthController extends Controller
         return response()->json(['token' => $token, 'user' => new UserResource($user)]);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/logout",
+     *     summary="Odjava korisnika",
+     *     tags={"Autentifikacija"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Uspešna odjava")
+     * )
+     */
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Uspešno odjavljen.']);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/me",
+     *     summary="Dohvatanje podataka o prijavljenom korisniku",
+     *     tags={"Autentifikacija"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Podaci o korisniku"),
+     *     @OA\Response(response=401, description="Niste prijavljeni")
+     * )
+     */
     public function me(Request $request)
     {
         return response()->json(['user' => new UserResource($request->user())]);
