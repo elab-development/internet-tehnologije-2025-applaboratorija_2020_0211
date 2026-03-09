@@ -1,8 +1,5 @@
-import { useState } from "react";
-import {
-    useNavigate,
-    Link as RouterLink,
-} from "react-router-dom";
+import { useState, useCallback } from 'react';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
     Box,
     Card,
@@ -12,54 +9,74 @@ import {
     Typography,
     Alert,
     CircularProgress,
-    Paper,
     Container,
     Link,
-} from "@mui/material";
-import axiosClient from "../axiosClient.js";
-import {useStateContext} from "../context/ContextProvider.jsx";
+    Tooltip,
+} from '@mui/material';
+import { Security } from '@mui/icons-material';
+import axiosClient from '../axiosClient.js';
+import { useStateContext } from '../context/ContextProvider.jsx';
+import { useRecaptcha } from '../hooks/useRecaptcha.js'; // ← NOVO
+import { RECAPTCHA_CONFIG } from '../config/externalApis.js'; // ← NOVO
 
 export function Login() {
     const navigate = useNavigate();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
     const { setUser, setToken } = useStateContext();
+    const { getToken, isReady } = useRecaptcha(); // ← NOVO
 
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        setError('');
-        setLoading(true);
+    const handleSubmit = useCallback(
+        async (e) => {
+            e.preventDefault();
+            setError('');
+            setLoading(true);
 
-        axiosClient.post("/login", { email, password })
-            .then(({ data }) => {
+            try {
+                // ─── Korak 1: Dohvati reCAPTCHA token (Eksterni API #1) ───
+                const recaptchaToken = await getToken(
+                    RECAPTCHA_CONFIG.actions.LOGIN
+                );
+
+                // ─── Korak 2: Pošalji login zahtev sa tokenom ─────────────
+                // Backend verifikuje token sa Google API-jem pre prijave.
+                // Ako reCAPTCHA nije spreman (dev mode bez ključa),
+                // token je null i backend može da preskoči verifikaciju.
+                const { data } = await axiosClient.post('/login', {
+                    email,
+                    password,
+                    recaptcha_token: recaptchaToken, // ← šaljemo token
+                });
+
                 setToken(data.token);
                 setUser(data.user);
                 navigate(`/autenticate/${data.user.role}`);
-
-            })
-            .catch(err => {
+            } catch (err) {
                 setError(
                     err.response?.data?.message || 'Neispravni kredencijali.'
                 );
-            })
-            .finally(() => setLoading(false));
-    };
+            } finally {
+                setLoading(false);
+            }
+        },
+        [email, password, getToken, navigate, setToken, setUser]
+    );
 
     return (
         <Container maxWidth="sm">
             <Box
                 sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    minHeight: "calc(100vh - 16rem)",
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minHeight: 'calc(100vh - 16rem)',
                     py: 4,
                 }}
             >
-                <Card sx={{ width: "100%", boxShadow: 3 }}>
+                <Card sx={{ width: '100%', boxShadow: 3 }}>
                     <CardContent sx={{ p: 4 }}>
                         <Typography
                             variant="h4"
@@ -81,8 +98,8 @@ export function Login() {
                         <form onSubmit={handleSubmit}>
                             <Box
                                 sx={{
-                                    display: "flex",
-                                    flexDirection: "column",
+                                    display: 'flex',
+                                    flexDirection: 'column',
                                     gap: 3,
                                 }}
                             >
@@ -100,6 +117,7 @@ export function Login() {
                                     disabled={loading}
                                     fullWidth
                                     variant="outlined"
+                                    autoComplete="email"
                                 />
 
                                 <TextField
@@ -107,14 +125,15 @@ export function Login() {
                                     type="password"
                                     placeholder="••••••••"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
                                     required
                                     disabled={loading}
                                     fullWidth
                                     variant="outlined"
+                                    autoComplete="current-password"
                                 />
-
-
 
                                 <Button
                                     type="submit"
@@ -124,23 +143,54 @@ export function Login() {
                                     disabled={loading}
                                     sx={{ mt: 2 }}
                                     startIcon={
-                                        loading && (
+                                        loading ? (
                                             <CircularProgress
                                                 size={20}
                                                 color="inherit"
                                             />
-                                        )
+                                        ) : null
                                     }
                                 >
-                                    {loading ? "Učitavanje..." : "Prijavite se"}
+                                    {loading
+                                        ? 'Prijavljivanje...'
+                                        : 'Prijavite se'}
                                 </Button>
+
+                                {/* ─── reCAPTCHA indikator ───────────────── */}
+                                <Box
+                                    display="flex"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    gap={0.5}
+                                >
+                                    <Tooltip
+                                        title={
+                                            isReady
+                                                ? 'Forma je zaštićena sa Google reCAPTCHA v3'
+                                                : 'reCAPTCHA se inicijalizuje...'
+                                        }
+                                    >
+                                        <Security
+                                            fontSize="small"
+                                            color={
+                                                isReady ? 'success' : 'disabled'
+                                            }
+                                        />
+                                    </Tooltip>
+                                    <Typography
+                                        variant="caption"
+                                        color="text.disabled"
+                                    >
+                                        Zaštićeno sa reCAPTCHA v3
+                                    </Typography>
+                                </Box>
 
                                 <Typography
                                     variant="body2"
                                     textAlign="center"
                                     color="text.secondary"
                                 >
-                                    Nemate nalog?{" "}
+                                    Nemate nalog?{' '}
                                     <Link
                                         component={RouterLink}
                                         to="/register"
