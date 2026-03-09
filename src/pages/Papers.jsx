@@ -33,6 +33,7 @@ import {
 import { PageHeader, SortSelect } from '../components/index.js';
 import axiosClient from '../axiosClient.js';
 import { useStateContext } from '../context/ContextProvider.jsx';
+import { sanitizeText, sanitizeUrl } from '../utils/sanitize.js';
 
 const CATEGORY_OPTIONS = [
     'IT',
@@ -272,20 +273,20 @@ export function Papers() {
                                                     gutterBottom
                                                     fontWeight={600}
                                                 >
-                                                    {paper.title}
+                                                    {sanitizeText(paper.title)}
                                                 </Typography>
                                                 <Typography
                                                     variant="body2"
                                                     color="text.secondary"
                                                     gutterBottom
                                                 >
-                                                    {paper.leader?.name}
+                                                    {sanitizeText(paper.leader?.name)}
                                                 </Typography>
                                                 <Typography
                                                     variant="body2"
                                                     paragraph
                                                 >
-                                                    {paper.description}
+                                                    {sanitizeText(paper.description)}
                                                 </Typography>
                                                 <Box sx={{ mb: 1 }}>
                                                     <Chip
@@ -350,12 +351,10 @@ export function Papers() {
                                         <Button
                                             size="small"
                                             startIcon={<Download />}
-                                            onClick={() =>
-                                                window.open(
-                                                    paper.document_url,
-                                                    '_blank'
-                                                )
-                                            }
+                                            onClick={() => {
+                                                const safeUrl = sanitizeUrl(paper.document_url);
+                                                if (safeUrl) window.open(safeUrl, '_blank', 'noopener,noreferrer');
+                                            }}
                                             disabled={!paper.document_url}
                                         >
                                             PDF
@@ -371,7 +370,7 @@ export function Papers() {
                                                     setReportDialog({
                                                         open: true,
                                                         projectId: paper.id,
-                                                        projectTitle: paper.title,
+                                                        projectTitle: sanitizeText(paper.title),
                                                     });
                                                     setReportDesc('');
                                                     setReportError('');

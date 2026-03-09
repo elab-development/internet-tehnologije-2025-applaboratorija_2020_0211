@@ -4,6 +4,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\RoleMiddleware;
+use App\Http\Middleware\SecurityHeadersMiddleware;
+use App\Http\Middleware\SanitizeInputMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,7 +20,17 @@ return Application::configure(basePath: dirname(__DIR__))
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
-        // Alias za role middleware
+        // ← NOVO: Security headers na sve API odgovore
+        $middleware->api(append: [
+            SecurityHeadersMiddleware::class,
+        ]);
+
+        // ← NOVO: Sanitizacija inputa na sve API zahteve
+        $middleware->api(append: [
+            SanitizeInputMiddleware::class,
+        ]);
+
+        // Alias za middleware
         $middleware->alias([
             'role' => RoleMiddleware::class,
         ]);

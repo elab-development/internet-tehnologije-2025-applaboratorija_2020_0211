@@ -65,9 +65,7 @@ class ReservationController extends Controller
 
     public function destroy(Request $request, Reservation $reservation)
     {
-        if ($reservation->user_id !== $request->user()->id && !$request->user()->isAdmin()) {
-            return response()->json(['message' => 'Nemate dozvolu za ovu akciju.'], 403);
-        }
+        $this->authorize('delete', $reservation);
 
         $reservation->delete();
         return response()->json(['message' => 'Rezervacija obrisana.']);

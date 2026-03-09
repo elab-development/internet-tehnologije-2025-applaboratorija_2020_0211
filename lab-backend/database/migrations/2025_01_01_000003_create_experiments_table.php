@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('protocol')->nullable();
-            $table->date('date_performed')->nullable();
+            $table->dateTime('date_performed')->nullable();
             $table->string('status')->default('in_progress');
             $table->foreignId('project_id')->constrained('projects')->onDelete('cascade');
             $table->timestamps();

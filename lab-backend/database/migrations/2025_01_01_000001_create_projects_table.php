@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->text('description')->nullable();
             $table->decimal('budget', 15, 2)->nullable();
-            $table->string('status')->default('planned'); // planned|active|completed
+            $table->string('status')->default('planning'); // planning|active|completed|archived
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->string('document_path')->nullable();

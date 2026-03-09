@@ -41,7 +41,8 @@ class ExperimentController extends Controller
 
     public function update(Request $request, Experiment $experiment)
     {
-        $this->authorize('update', $experiment->project);
+        // BEZBEDNOST #2: IDOR zaštita
+        $this->authorize('update', $experiment);
 
         $data = $request->validate([
             'name'           => 'sometimes|string|max:255',
@@ -58,7 +59,8 @@ class ExperimentController extends Controller
 
     public function destroy(Request $request, Experiment $experiment)
     {
-        $this->authorize('delete', $experiment->project);
+        // BEZBEDNOST #2: IDOR zaštita
+        $this->authorize('delete', $experiment);
 
         $experiment->delete();
         return response()->json(['message' => 'Eksperiment obrisan.']);

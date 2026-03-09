@@ -24,6 +24,7 @@ import {
 } from '@mui/material';
 import { ConfirmDialog } from '../components/index.js';
 import axiosClient from '../axiosClient.js';
+import { sanitizeText } from '../utils/sanitize.js';
 
 const statusOptions = [
     { value: 'planned', label: 'Planiran' },
@@ -233,12 +234,12 @@ export function Projects() {
                                     <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
                                         <Box>
                                             <Typography variant="h5" fontWeight="bold">
-                                                {project.title}
+                                                {sanitizeText(project.title)}
                                                 <Typography component="span" sx={{ ml: 2, color: 'text.disabled' }}>
-                                                    #{project.code}
+                                                    #{sanitizeText(project.code)}
                                                 </Typography>
                                             </Typography>
-                                            <Chip label={project.category} size="small" variant="outlined" sx={{ mt: 1 }} />
+                                            <Chip label={sanitizeText(project.category)} size="small" variant="outlined" sx={{ mt: 1 }} />
                                         </Box>
                                         <Chip
                                             label={statusOptions.find(s => s.value === project.status)?.label || project.status}
@@ -248,7 +249,7 @@ export function Projects() {
                                     </Box>
 
                                     <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-                                        {project.description || 'Nema opisa.'}
+                                        {sanitizeText(project.description) || 'Nema opisa.'}
                                     </Typography>
 
                                     <Grid container spacing={4}>

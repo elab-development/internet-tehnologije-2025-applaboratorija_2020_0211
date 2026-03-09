@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
             $table->text('description');
-            $table->string('status')->default('pending');
+            $table->string('status')->default('draft'); // draft|submitted|reviewed|approved
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('project_id')->constrained('projects')->onDelete('cascade');
             $table->timestamps();

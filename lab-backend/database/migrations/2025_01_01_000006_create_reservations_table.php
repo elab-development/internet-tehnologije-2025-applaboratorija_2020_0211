@@ -13,7 +13,7 @@ return new class extends Migration
             $table->dateTime('start_time');
             $table->dateTime('end_time');
             $table->text('purpose')->nullable();
-            $table->string('status')->default('active');
+            $table->string('status')->default('pending'); // pending|approved|rejected|completed|cancelled
             $table->foreignId('equipment_id')->constrained('equipment')->onDelete('cascade');
             $table->foreignId('project_id')->constrained('projects')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');

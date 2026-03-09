@@ -27,6 +27,7 @@ import {
 import { PageHeader } from '../components/index.js';
 import axiosClient from '../axiosClient.js';
 import { useStateContext } from '../context/ContextProvider.jsx';
+import { sanitizeText, sanitizeUrl } from '../utils/sanitize.js';
 
 export function PaperDetail() {
     const { id } = useParams();
@@ -136,8 +137,8 @@ export function PaperDetail() {
         <Box>
             {/* ✅ PageHeader sa Back dugmetom */}
             <PageHeader
-                title={paper.title}
-                subtitle={`Kategorija: ${paper.category}`}
+                title={sanitizeText(paper.title)}
+                subtitle={`Kategorija: ${sanitizeText(paper.category)}`}
                 action={
                     <Button
                         startIcon={<ArrowBack />}
@@ -166,8 +167,7 @@ export function PaperDetail() {
                                 color="text.secondary"
                                 paragraph
                             >
-                                {paper.description ||
-                                    'Nema opisa za ovaj rad.'}
+                                {sanitizeText(paper.description) || 'Nema opisa za ovaj rad.'}
                             </Typography>
 
                             <Divider sx={{ my: 3 }} />
@@ -191,7 +191,7 @@ export function PaperDetail() {
                                         RUKOVODILAC
                                     </Typography>
                                     <Typography variant="body2">
-                                        {paper.leader?.name || '—'}
+                                        {sanitizeText(paper.leader?.name || '—')}
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={6}>
@@ -323,9 +323,10 @@ export function PaperDetail() {
                                 startIcon={<Download />}
                                 sx={{ mb: 2 }}
                                 disabled={!paper.document_url}
-                                onClick={() =>
-                                    window.open(paper.document_url, '_blank')
-                                }
+                                onClick={() => {
+                                    const safeUrl = sanitizeUrl(paper.document_url);
+                                    if (safeUrl) window.open(safeUrl, '_blank', 'noopener,noreferrer');
+                                }}
                             >
                                 Preuzmi PDF
                             </Button>
