@@ -12,7 +12,8 @@ vi.mock('../axiosClient.js', () => ({
     },
 }));
 
-import { ContextProvider, useStateContext } from '../context/ContextProvider.jsx';
+import { ContextProvider } from "../context/ContextProvider.jsx";
+import { useStateContext } from "../context/useStateContext.js";
 import axiosClient from '../axiosClient.js';
 
 // Test komponenta koja koristi context

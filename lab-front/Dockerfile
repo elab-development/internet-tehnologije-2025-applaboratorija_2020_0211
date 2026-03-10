@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Kopiranje package fajlova i instalacija zavisnosti
 COPY package.json package-lock.json* ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Kopiranje celog koda i bildovanje
 COPY . .
@@ -24,7 +24,8 @@ RUN rm -rf /usr/share/nginx/html/*
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Kopiranje custom Nginx konfiguracije za React Router (SPA)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Build kontekst je roditeljski direktorijum, pa referenciraj lab-front/nginx.conf
+COPY lab-front/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Otvaranje porta 3000
 EXPOSE 3000

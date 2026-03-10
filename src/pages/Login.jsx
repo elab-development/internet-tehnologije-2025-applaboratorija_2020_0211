@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { Security } from '@mui/icons-material';
 import axiosClient from '../axiosClient.js';
-import { useStateContext } from '../context/ContextProvider.jsx';
+import { useStateContext } from "../context/useStateContext.js";
 import { useRecaptcha } from '../hooks/useRecaptcha.js'; // ← NOVO
 import { RECAPTCHA_CONFIG } from '../config/externalApis.js'; // ← NOVO
 

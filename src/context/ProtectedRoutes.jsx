@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { CircularProgress, Box } from '@mui/material';
-import {useStateContext} from "./ContextProvider.jsx";
+import { useStateContext } from "./useStateContext.js";
 
 export function ProtectedRoute({ allowedRoles }) {
     const { user, token ,loading} = useStateContext();

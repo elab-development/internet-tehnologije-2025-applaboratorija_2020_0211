@@ -32,7 +32,7 @@ import {
 } from '@mui/icons-material';
 import { PageHeader, SortSelect } from '../components/index.js';
 import axiosClient from '../axiosClient.js';
-import { useStateContext } from '../context/ContextProvider.jsx';
+import { useStateContext } from "../context/useStateContext.js";
 import { sanitizeText, sanitizeUrl } from '../utils/sanitize.js';
 
 const CATEGORY_OPTIONS = [

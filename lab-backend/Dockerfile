@@ -28,10 +28,13 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY . .
 
 # Instalacija Laravel zavisnosti
-RUN composer install --no-interaction --optimize-autoloader --no-dev
+RUN composer install --no-interaction --optimize-autoloader --no-dev --no-scripts
 
 # Generisanje key-a i storage linka (biće pregaženo entrypointom, ali je dobra praksa)
 RUN php artisan key:generate || true
+
+# Kreiranje direktorijuma ako ne postoje
+RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Postavljanje permisija (www-data je default korisnik za php-fpm)
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
@@ -39,6 +42,8 @@ RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Kopiranje i setovanje entrypoint skripte
 COPY docker-entrypoint.sh /usr/local/bin/
+# Konverzija iz CRLF u LF (Windows/Linux kompatibilnost)
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Otvaranje porta 8000
