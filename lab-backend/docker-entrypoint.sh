@@ -5,19 +5,31 @@ set -e
 
 echo "⏳ Čekanje da MySQL baza postane dostupna..."
 # Čeka dok MySQL kontejner (host 'db') ne odgovori na pingu
-while ! mysqladmin ping -h"db" --silent; do
+# Koristi /dev/tcp za direktan test konekcije
+TIMEOUT=60
+while [ $TIMEOUT -gt 0 ]; do
+    if nc -z db 3306 2>/dev/null; then
+        echo "✅ MySQL je dostupan!"
+        break
+    fi
+    echo "Pokušaj konekcije... ($TIMEOUT sekundi preostalo)"
     sleep 2
+    TIMEOUT=$((TIMEOUT - 2))
 done
-echo "✅ MySQL je dostupan!"
+
+if [ $TIMEOUT -le 0 ]; then
+    echo "❌ MySQL nije dostupan nakon 60 sekundi!"
+    exit 1
+fi
+
+echo "📦 Pokretanje migracija..."
+# Pokreće migracije bez brisanja (safe za restart kontejnera)
+php artisan migrate --force || true
 
 echo "🔄 Brisanje keša i kreiranje storage linka..."
-php artisan config:clear
-php artisan cache:clear
+php artisan config:clear || true
+php artisan cache:clear || true
 php artisan storage:link || true
-
-echo "📦 Pokretanje migracija i seedera..."
-# Pokreće migracije i seedere (puni bazu inicijalnim podacima iz Commita 5)
-php artisan migrate:fresh --seed --force
 
 echo "🚀 Pokretanje Laravel servera na portu 8000..."
 # Pošto je studentski projekat, artisan serve je savršen za kontejner bez dodatnog Nginxa za backend

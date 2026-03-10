@@ -47,8 +47,8 @@ services:
   # 3. Frontend (React + Vite + Nginx)
   frontend:
     build:
-      context: ./lab-front
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: lab-front/Dockerfile
     container_name: researchhub_frontend
     restart: unless-stopped
     ports:

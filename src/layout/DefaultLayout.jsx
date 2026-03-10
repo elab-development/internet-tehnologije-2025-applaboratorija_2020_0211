@@ -33,7 +33,7 @@ import FlagIcon from '@mui/icons-material/Flag';
 import PersonIcon from '@mui/icons-material/Person';
 import BarChartIcon from '@mui/icons-material/BarChart';  // NOVO (Commit 3)
 
-import { useStateContext } from "../context/ContextProvider.jsx";
+import { useStateContext } from "../context/useStateContext.js";
 
 const DRAWER_WIDTH = 256;
 

@@ -1,0 +1,25 @@
+services:
+  # Baza podataka
+  - type: pserv
+    name: researchhub-db
+    env: docker
+    plan: free
+
+  # Laravel Backend kontejner
+  - type: web
+    name: researchhub-api
+    env: docker
+    dockerContext: ./lab-backend
+    dockerfilePath: ./lab-backend/Dockerfile
+    plan: free
+    healthCheckPath: /up
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: DB_HOST
+        fromService:
+          type: pserv
+          name: researchhub-db
+          property: host

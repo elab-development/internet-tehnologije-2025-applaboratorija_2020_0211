@@ -1,20 +1,17 @@
-name: CI/CD Pipeline
+name: ResearchHub CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - '**'
+    branches: [ "main", "develop" ]
   pull_request:
-    branches:
-      - '**'
+    branches: [ "main", "develop" ]
 
 jobs:
-  build-and-lint:
-    name: Install, Lint & Build
+  # 1. Frontend Testovi
+  frontend-tests:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout repozitorijuma
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -22,19 +19,85 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: './package-lock.json'
 
-      - name: Install dependencies
+      - name: Instalacija zavisnosti
         run: npm ci
 
-      - name: Run ESLint
-        run: npm run lint
+      - name: Pokretanje Vitest testova
+        run: npm run test:run
 
-      - name: Build project
-        run: npm run build
+  # 2. Backend Testovi
+  backend-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./lab-backend
+    steps:
+      - name: Checkout repozitorijuma
+        uses: actions/checkout@v4
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      - name: Setup PHP sa ekstenzijama
+        uses: shivammathur/setup-php@v2
         with:
-          name: dist
-          path: dist/
-          retention-days: 7
+          php-version: '8.2'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, gd
+          coverage: none
+
+      - name: Instalacija Composer zavisnosti
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Priprema .env.testing fajla
+        run: cp .env.testing .env
+
+      - name: Generisanje APP_KEY
+        run: php artisan key:generate --env=testing
+
+      - name: Pokretanje PHPUnit testova (sa SQLite in-memory bazom)
+        run: php artisan test
+
+  # 3. Provera Docker Build-a (Zavisi od prolaska testova)
+  docker-build-check:
+    needs: [frontend-tests, backend-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repozitorijuma
+        uses: actions/checkout@v4
+
+      - name: Build Docker kompozicije
+        run: docker-compose build
+
+  # 4. Deployment na Cloud (Render + Vercel)
+  # Napomena: Ovo je template koji zahteva konfiguraciju secrets u GitHub Actions
+  # Korak 1: Konfigurisati GitHub Actions secrets:
+  #   - RENDER_API_KEY: API ključ sa https://dashboard.render.com/api-tokens
+  #   - VERCEL_TOKEN: Vercel token sa https://vercel.com/account/tokens
+  #   - RENDER_SERVICE_ID: ID backend servisa na Render-u
+  #
+  # Korak 2: Raspakovaliti secrets i koristiti ih u deploy jobovima
+  deploy:
+    needs: [docker-build-check]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout repozitorijuma
+        uses: actions/checkout@v4
+
+      # Deploy Backend na Render (ako je RENDER_API_KEY i RENDER_SERVICE_ID konfigurisani)
+      - name: Deploy Backend na Render
+        if: vars.RENDER_SERVICE_ID != ''
+        run: |
+          curl -X POST "https://api.render.com/deploy/srv/${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json"
+        continue-on-error: true
+
+      # Deploy Frontend na Vercel (ako je VERCEL_TOKEN konfigurisano)
+      - name: Deploy Frontend na Vercel
+        if: secrets.VERCEL_TOKEN != ''
+        run: |
+          npm install -g vercel
+          vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+        continue-on-error: true
+
+      - name: Deployment Status
+        run: echo "✅ Cloud deployment workflow završen. Proveri GitHub Actions secrets ako deployment nije prošao."

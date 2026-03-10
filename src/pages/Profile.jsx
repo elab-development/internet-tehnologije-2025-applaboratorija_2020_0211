@@ -15,7 +15,7 @@ import {
 import { Save, Lock } from '@mui/icons-material';
 import { PageHeader } from '../components/index.js';
 import axiosClient from '../axiosClient.js';
-import { useStateContext } from '../context/ContextProvider.jsx';
+import { useStateContext } from "../context/useStateContext.js";
 
 export function Profile() {
     const { user, setUser } = useStateContext();

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Grid, Paper, Typography } from '@mui/material';
 import { Bookmark } from '@mui/icons-material';
-import { useStateContext } from '../context/ContextProvider.jsx';
+import { useStateContext } from "../context/useStateContext.js";
 import { StatCard, PageHeader, EmptyState } from '../components/index.js';
 import axiosClient from '../axiosClient.js';
 
