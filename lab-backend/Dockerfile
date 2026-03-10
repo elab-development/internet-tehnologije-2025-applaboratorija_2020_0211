@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     zip \
     unzip \
-    default-mysql-client
+    default-mysql-client \
+    netcat-openbsd
 
 # Čišćenje keša
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
