@@ -15,10 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Sanctum stateful za SPA auth
-        $middleware->api(prepend: [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-        ]);
+        // Aplikacija koristi Bearer token auth (ne session-based SPA auth),
+        // pa EnsureFrontendRequestsAreStateful nije potreban i aktivno izaziva
+        // CSRF token mismatch grešku za sve POST/PUT/DELETE zahteve sa localhost:3000.
 
         // ← NOVO: Security headers na sve API odgovore
         $middleware->api(append: [

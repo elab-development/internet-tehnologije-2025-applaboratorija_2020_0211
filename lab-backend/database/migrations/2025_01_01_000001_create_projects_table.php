@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('code')->unique();
+            $table->string('code');
             $table->text('description')->nullable();
             $table->decimal('budget', 15, 2)->nullable();
             $table->string('status')->default('planning'); // planning|active|completed|archived

@@ -8,10 +8,11 @@ class RecaptchaService
 {
     public function verify(string $token, string $action): bool
     {
-        $secret = config('services.recaptcha.secret');
+        $secret  = config('services.recaptcha.secret');
+        $enabled = config('services.recaptcha.enabled', true);
 
-        if (!$secret) {
-            return true; // Skip verification if secret is not configured
+        if (!$secret || !$enabled) {
+            return true; // Skip if secret not configured or reCAPTCHA disabled
         }
 
         try {

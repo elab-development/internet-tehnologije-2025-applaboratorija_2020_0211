@@ -1,7 +1,7 @@
 #!/bin/bash
 # lab-backend/docker-entrypoint.sh
 
-set -e
+set +e
 
 echo "⏳ Čekanje da MySQL baza postane dostupna..."
 # Čeka dok MySQL kontejner (host 'db') ne odgovori na pingu
@@ -24,7 +24,17 @@ fi
 
 echo "📦 Pokretanje migracija..."
 # Pokreće migracije bez brisanja (safe za restart kontejnera)
+# Prikazaće izlaz u Docker logovima za lakše debagovanje
 php artisan migrate --force || true
+
+echo "🌱 Pokretanje seedera..."
+# Popunjava bazu test podacima (admin, researcher, user nalozi)
+# --force je potrebno u non-interactive okruženju
+php artisan db:seed --force || true
+
+echo "📁 Kreiranje storage direktorijuma..."
+mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache/data storage/logs
+chmod -R 777 storage bootstrap/cache
 
 echo "🔄 Brisanje keša i kreiranje storage linka..."
 php artisan config:clear || true

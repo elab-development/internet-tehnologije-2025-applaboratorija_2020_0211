@@ -15,6 +15,12 @@ services:
       MYSQL_PASSWORD: root
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
   # 2. Backend (Laravel)
   backend:
@@ -26,7 +32,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       # Mapiranje storage-a kako bi uploadovani PDF-ovi bili vidljivi i na hostu
       - ./lab-backend/storage/app/public:/var/www/html/storage/app/public
@@ -43,6 +50,8 @@ services:
       # Zaštite
       RECAPTCHA_ENABLED: "false"
       MAIL_MAILER: log
+      CACHE_STORE: file
+      SESSION_DRIVER: file
 
   # 3. Frontend (React + Vite + Nginx)
   frontend:
