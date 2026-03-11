@@ -49,7 +49,11 @@ services:
       SANCTUM_STATEFUL_DOMAINS: localhost:3000
       # Zaštite
       RECAPTCHA_ENABLED: "false"
-      MAIL_MAILER: log
+      # Resend email
+      MAIL_MAILER: resend
+      RESEND_API_KEY: re_2Js2hJxw_7DWV1yu4X5k3bJh4ksavdoxn
+      RESEND_FROM_EMAIL: onboarding@resend.dev
+      MAIL_FROM_ADDRESS: onboarding@resend.dev
       CACHE_STORE: file
       SESSION_DRIVER: file
 

@@ -25,9 +25,12 @@ class FavoriteController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        $projects = $favorites->map(fn($fav) => $fav->project);
-
-        return ProjectResource::collection(collect($projects));
+        return response()->json([
+            'favorites' => $favorites->map(fn($fav) => [
+                'id'      => $fav->id,
+                'project' => new ProjectResource($fav->project),
+            ]),
+        ]);
     }
 
     /**

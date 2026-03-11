@@ -12,6 +12,7 @@ import {
 import { BookmarkBorder, Download } from '@mui/icons-material';
 import { PageHeader, EmptyState } from '../components/index.js';
 import axiosClient from '../axiosClient.js';
+import { sanitizeUrl } from '../utils/sanitize.js';
 
 export function SavedPapers() {
     const [favorites, setFavorites] = useState([]);
@@ -124,12 +125,11 @@ export function SavedPapers() {
                                         <Button
                                             size="small"
                                             startIcon={<Download />}
-                                            onClick={() =>
-                                                window.open(
-                                                    paper.document_url,
-                                                    '_blank'
-                                                )
-                                            }
+                                            disabled={!paper.document_url}
+                                            onClick={() => {
+                                                const safeUrl = sanitizeUrl(paper.document_url);
+                                                if (safeUrl) window.open(safeUrl, '_blank', 'noopener,noreferrer');
+                                            }}
                                         >
                                             Preuzmi PDF
                                         </Button>
