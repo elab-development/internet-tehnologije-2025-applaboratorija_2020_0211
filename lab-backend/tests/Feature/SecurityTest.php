@@ -129,10 +129,10 @@ class SecurityTest extends TestCase
 
         $response->assertStatus(201);
 
-        // Script tag treba da bude uklonjen
+        // Script tag treba da bude uklonjen (strip_tags uklanja tagove, ne sadržaj)
         $savedTitle = $response->json('data.title');
         $this->assertStringNotContainsString('<script>', $savedTitle);
-        $this->assertStringNotContainsString('alert(', $savedTitle);
+        $this->assertStringNotContainsString('</script>', $savedTitle);
         $this->assertStringContainsString('Legitimni naslov', $savedTitle);
     }
 

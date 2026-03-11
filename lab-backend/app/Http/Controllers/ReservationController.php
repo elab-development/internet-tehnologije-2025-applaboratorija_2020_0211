@@ -57,7 +57,7 @@ class ReservationController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'start_time'    => 'required|date_format:Y-m-d H:i',
+            'start_time'    => 'required|date_format:Y-m-d H:i|after:now',
             'end_time'      => 'required|date_format:Y-m-d H:i|after:start_time',
             'purpose'       => 'required|string|max:500',
             'status'        => 'required|in:pending,approved,rejected,completed,cancelled',
