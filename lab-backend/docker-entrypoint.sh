@@ -3,6 +3,13 @@
 
 set +e
 
+# ─── Ključne env varijable ──────────────────────────
+echo "🔍 DB_CONNECTION = ${DB_CONNECTION}"
+echo "🔍 DB_HOST       = ${DB_HOST}"
+echo "🔍 DB_PORT       = ${DB_PORT}"
+echo "🔍 DB_DATABASE   = ${DB_DATABASE}"
+echo "🔍 APP_ENV       = ${APP_ENV}"
+
 # ─── Čekanje na bazu ───────────────────────────────────────────────
 DB_HOST="${DB_HOST:-db}"
 DB_PORT="${DB_PORT:-5432}"   # default = PostgreSQL; lokalno Docker Compose overriduje na 3306

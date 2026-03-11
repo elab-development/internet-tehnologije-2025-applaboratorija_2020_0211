@@ -1,0 +1,44 @@
+# ─── Env fajlovi (produkcija dobija env od Rendera) ────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Git metapodaci ────────────────────────────────────────────────
+.git
+.gitignore
+.gitattributes
+
+# ─── Zavisnosti (reinstaliraju se tokom build-a) ───────────────────
+/vendor
+/node_modules
+
+# ─── Testovi (ne trebaju u produkciji) ─────────────────────────────
+/tests
+phpunit.xml
+.phpunit.result.cache
+coverage/
+
+# ─── Dokumentacija ─────────────────────────────────────────────────
+*.md
+README*
+CHANGELOG*
+
+# ─── IDE i editor ──────────────────────────────────────────────────
+.idea
+.vscode
+*.swp
+*.swo
+
+# ─── OS fajlovi ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Lokalni Docker fajlovi ────────────────────────────────────────
+docker-compose.yml
+docker-compose*.yml
+
+# ─── Storage runtime fajlovi ───────────────────────────────────────
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
