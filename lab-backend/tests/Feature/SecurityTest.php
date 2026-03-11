@@ -117,9 +117,14 @@ class SecurityTest extends TestCase
         $maliciousTitle = '<script>alert("XSS")</script>Legitimni naslov';
 
         $response = $this->postJson('/api/projects', [
-            'title'  => $maliciousTitle,
-            'code'   => 'PRJ-XSS-001',
-            'status' => 'active',
+            'title'       => $maliciousTitle,
+            'code'        => 'PRJ-XSS-001',
+            'description' => 'Legitiman opis projekta',
+            'budget'      => 10000,
+            'category'    => 'IT',
+            'status'      => 'active',
+            'start_date'  => '2025-01-01',
+            'end_date'    => '2026-01-01',
         ]);
 
         $response->assertStatus(201);
@@ -146,7 +151,11 @@ class SecurityTest extends TestCase
             'title'       => 'Test XSS projekat',
             'code'        => 'PRJ-XSS-002',
             'description' => $maliciousDesc,
+            'budget'      => 10000,
+            'category'    => 'IT',
             'status'      => 'active',
+            'start_date'  => '2025-01-01',
+            'end_date'    => '2026-01-01',
         ]);
 
         $response->assertStatus(201);

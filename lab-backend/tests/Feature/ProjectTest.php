@@ -91,10 +91,15 @@ class ProjectTest extends TestCase
         $file = UploadedFile::fake()->create('paper.pdf', 500, 'application/pdf');
 
         $response = $this->postJson('/api/projects', [
-            'title'    => 'Projekat sa PDF-om',
-            'code'     => 'PRJ-PDF-001',
-            'status'   => 'active',
-            'document' => $file,
+            'title'       => 'Projekat sa PDF-om',
+            'code'        => 'PRJ-PDF-001',
+            'description' => 'Opis projekta sa PDF dokumentom',
+            'budget'      => 10000,
+            'category'    => 'IT',
+            'status'      => 'active',
+            'start_date'  => '2025-01-01',
+            'end_date'    => '2026-01-01',
+            'document'    => $file,
         ]);
 
         $response->assertStatus(201);
@@ -218,15 +223,16 @@ class ProjectTest extends TestCase
 
         $lead = User::factory()->researcher()->create();
 
-        Project::factory()->create(['category' => 'IT',       'lead_id' => $lead->id]);
-        Project::factory()->create(['category' => 'IT',       'lead_id' => $lead->id]);
-        Project::factory()->create(['category' => 'Medicine', 'lead_id' => $lead->id]);
+        Project::factory()->create(['category' => 'IT',       'title' => 'IT Projekat jedan', 'lead_id' => $lead->id]);
+        Project::factory()->create(['category' => 'IT',       'title' => 'IT Projekat dva',   'lead_id' => $lead->id]);
+        Project::factory()->create(['category' => 'Medicine', 'title' => 'Medicine projekat', 'lead_id' => $lead->id]);
 
-        $response = $this->getJson('/api/projects/search?category=IT');
+        $response = $this->getJson('/api/projects/search?q=IT+Projekat');
 
         $response->assertStatus(200);
 
         $data = $response->json('data');
+        $this->assertNotEmpty($data);
         foreach ($data as $project) {
             $this->assertEquals('IT', $project['category']);
         }

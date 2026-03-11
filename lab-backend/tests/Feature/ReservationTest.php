@@ -43,8 +43,9 @@ class ReservationTest extends TestCase
         $response = $this->postJson('/api/reservations', [
             'equipment_id' => $this->equipment->id,
             'project_id'   => $this->project->id,
-            'start_time'   => now()->addDay()->format('Y-m-d H:i:s'),
-            'end_time'     => now()->addDay()->addHours(4)->format('Y-m-d H:i:s'),
+            'start_time'   => now()->addDay()->format('Y-m-d H:i'),
+            'end_time'     => now()->addDay()->addHours(4)->format('Y-m-d H:i'),
+            'status'       => 'pending',
             'purpose'      => 'PCR analiza uzoraka',
         ]);
 
@@ -79,8 +80,9 @@ class ReservationTest extends TestCase
         $response = $this->postJson('/api/reservations', [
             'equipment_id' => $this->equipment->id,
             'project_id'   => $this->project->id,
-            'start_time'   => now()->addDay()->setHour(12)->setMinute(0)->format('Y-m-d H:i:s'),
-            'end_time'     => now()->addDay()->setHour(20)->setMinute(0)->format('Y-m-d H:i:s'),
+            'start_time'   => now()->addDay()->setHour(12)->setMinute(0)->format('Y-m-d H:i'),
+            'end_time'     => now()->addDay()->setHour(20)->setMinute(0)->format('Y-m-d H:i'),
+            'status'       => 'pending',
             'purpose'      => 'Pokušaj konflikta',
         ]);
 
@@ -105,8 +107,9 @@ class ReservationTest extends TestCase
         $response = $this->postJson('/api/reservations', [
             'equipment_id' => $this->equipment->id,
             'project_id'   => $this->project->id,
-            'start_time'   => now()->addDay()->setHour(14)->setMinute(0)->format('Y-m-d H:i:s'),
-            'end_time'     => now()->addDay()->setHour(17)->setMinute(0)->format('Y-m-d H:i:s'),
+            'start_time'   => now()->addDay()->setHour(14)->setMinute(0)->format('Y-m-d H:i'),
+            'end_time'     => now()->addDay()->setHour(17)->setMinute(0)->format('Y-m-d H:i'),
+            'status'       => 'pending',
             'purpose'      => 'Bez konflikta',
         ]);
 
@@ -160,8 +163,9 @@ class ReservationTest extends TestCase
         $response = $this->postJson('/api/reservations', [
             'equipment_id' => $this->equipment->id,
             'project_id'   => $this->project->id,
-            'start_time'   => now()->subDay()->format('Y-m-d H:i:s'), // prošlost
-            'end_time'     => now()->addDay()->format('Y-m-d H:i:s'),
+            'start_time'   => now()->subDay()->format('Y-m-d H:i'), // prošlost
+            'end_time'     => now()->addDay()->format('Y-m-d H:i'),
+            'status'       => 'pending',
             'purpose'      => 'Test prošlost',
         ]);
 
