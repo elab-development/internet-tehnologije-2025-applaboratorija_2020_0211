@@ -23,7 +23,7 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Instalacija PHP ekstenzija potrebnih za Laravel
 # pdo_mysql  → lokalni Docker Compose (MySQL)
 # pdo_pgsql  → produkcija na Render (PostgreSQL)
-RUN docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd fileinfo
 
 # Instalacija Composera
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
