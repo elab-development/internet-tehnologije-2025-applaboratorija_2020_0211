@@ -40,15 +40,5 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        // JSON greške za API rute
-        $exceptions->render(function (\Throwable $e, $request) {
-            if ($request->is('api/*')) {
-                return response()->json([
-                    'message' => $e->getMessage(),
-                ], method_exists($e, 'getStatusCode')
-                    ? $e->getStatusCode()
-                    : 500
-                );
-            }
-        });
+        $exceptions->shouldRenderJsonWhen(fn($request) => $request->is('api/*'));
     })->create();
