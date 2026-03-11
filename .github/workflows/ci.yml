@@ -51,12 +51,12 @@ jobs:
         run: cp .env.testing .env
 
       - name: Generisanje APP_KEY
-        run: php artisan key:generate --env=testing
+        run: |
+          php artisan key:generate --env=testing
+          php artisan key:generate
 
       - name: Pokretanje PHPUnit testova (sa SQLite in-memory bazom)
-        run: |
-          mkdir -p tests/Unit tests/Feature
-          ./vendor/bin/phpunit
+        run: ./vendor/bin/phpunit
 
   # 3. Provera Docker Build-a (Zavisi od prolaska testova)
   docker-build-check:
