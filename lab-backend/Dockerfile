@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    libpq-dev \
     zip \
     unzip \
     default-mysql-client \
@@ -20,7 +21,9 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Instalacija PHP ekstenzija potrebnih za Laravel
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+# pdo_mysql  → lokalni Docker Compose (MySQL)
+# pdo_pgsql  → produkcija na Render (PostgreSQL)
+RUN docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd
 
 # Instalacija Composera
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
