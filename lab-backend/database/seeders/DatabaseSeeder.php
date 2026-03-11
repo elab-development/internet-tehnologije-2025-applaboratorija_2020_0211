@@ -12,9 +12,23 @@ use App\Models\Favorite;
 use App\Models\Report;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class DatabaseSeeder extends Seeder
 {
+    private function createDummyPdf(string $path): string
+    {
+        if (!Storage::disk('public')->exists(dirname($path))) {
+            Storage::disk('public')->makeDirectory(dirname($path));
+        }
+
+        // Minimal valid PDF Base64 string
+        $b64 = 'JVBERi0xLjQKJcOkw7zDtsOfCjIgMCBvYmoKPDwvTGVuZ3RoIDMgMCBSL0ZpbHRlci9GbGF0ZURlY29kZT4+CnN0cmVhbQp4nDPU0zA0UVBw1DVTcNBVyE5VgAIF1TQFdXUUVAwM1TwVLBUMlCyBhFAFMwMDBT0DBUNDA0XNXAUzPQNQxBhIAqkiV9dcBQgDANN/DlIKZW5kc3RyZWFtCmVuZG9iagoKCjMgMCBvYmoKNTAKZW5kb2JqCgo0IDAgb2JqCjw8L1R5cGUvUGFnZS9NZWRpYUJveFswIDAgNTk1IDg0Ml0vUmVzb3VyY2VzPDwvRm9udDw8L0YxIDEgMCBSPj4+Pi9Db250ZW50cyAyIDAgUi9QYXJlbnQgNSAwIFI+PgplbmRvYmoKCjEgMCBvYmoKPDwvVHlwZS9Gb250L1N1YnR5cGUvVHlwZTEvQmFzZUZvbnQvSGVsdmV0aWNhL0VuY29kaW5nL1dpbkFuc2lFbmNvZGluZz4+CmVuZG9iagoKNSAwIG9iago8PC9UeXBlL1BhZ2VzL0NvdW50IDEvS2lkc1s0IDAgUl0+PgplbmRvYmoKCjYgMCBvYmoKPDwvVHlwZS9DYXRhbG9nL1BhZ2VzIDUgMCBSPj4KZW5kb2JqCgo3IDAgb2JqCjw8L1Byb2R1Y2VyKGlUZXh0wq4gNy4yLjMgwqkyMDAwLTIwMjIgaVRleHQgR3JvdXAgTlYgXChBR1BMLXZlcnNpb25cKSkvTW9kRGF0ZShEOjIwMjMxMTI1MTQwMjExKzAxJzAwJykvQ3JlYXRpb25EYXRlKEQ6MjAyMzExMjUxNDAyMTErMDEnMDAnKT4+CmVuZG9iagoKeHJlZgowIDgKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMjk2IDAwMDAwIG4gCjAwMDAwMDAwMTUgMDAwMDAgbiAKMDAwMDAwMDEzNCAwMDAwMCBuIAowMDAwMDAwMTU1IDAwMDAwIG4gCjAwMDAwMDAzODQgMDAwMDAgbiAKMDAwMDAwMDQ0MSAwMDAwMCBuIAowMDAwMDAwNDg2IDAwMDAwIG4gCnRyYWlsZXIKPDwvU2l6ZSA4L1Jvb3QgNiAwIFIvSW5mbyA3IDAgUi9JRCBbPGI2OTQ0NGIyMDhmNGQ4NWM0ZDc5YWUxNWM0YTAzMjFiPjw3MDhhZmRjMDE5NmY0OGY1YjRiZTVkMTQwN2I1MzcxYj5dPj4Kc3RhcnR4cmVmCjYzMQolJUVPRgo=';
+        Storage::disk('public')->put($path, base64_decode($b64));
+
+        return $path;
+    }
+
     public function run(): void
     {
         // Create admin user
@@ -82,7 +96,7 @@ class DatabaseSeeder extends Seeder
                 'start_date'    => now()->subMonths(3),
                 'end_date'      => now()->addMonths(9),
                 'lead_id'       => $researcher1->id,
-                'document_path' => 'projects/nano-cestice-istrazivanje.pdf',
+                'document_path' => $this->createDummyPdf('projects/nano-cestice-istrazivanje.pdf'),
             ]
         );
 
@@ -97,7 +111,7 @@ class DatabaseSeeder extends Seeder
                 'start_date'    => now()->addMonths(1),
                 'end_date'      => now()->addMonths(13),
                 'lead_id'       => $researcher2->id,
-                'document_path' => 'projects/bio-senzor-razvoj.pdf',
+                'document_path' => $this->createDummyPdf('projects/bio-senzor-razvoj.pdf'),
             ]
         );
 
@@ -112,7 +126,7 @@ class DatabaseSeeder extends Seeder
                 'start_date'    => now()->subMonths(12),
                 'end_date'      => now()->subMonths(2),
                 'lead_id'       => $researcher1->id,
-                'document_path' => 'projects/polimeri-testiranje.pdf',
+                'document_path' => $this->createDummyPdf('projects/polimeri-testiranje.pdf'),
             ]
         );
 

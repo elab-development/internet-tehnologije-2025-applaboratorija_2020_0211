@@ -61,7 +61,7 @@ export function Projects() {
         code: '',
         description: '',
         budget: '',
-        category: '',
+        category: categoryOptions[0],
         status: 'active',
         start_date: '',
         end_date: '',
@@ -109,7 +109,7 @@ export function Projects() {
                 code: project.code || '',
                 description: project.description || '',
                 budget: project.budget || '',
-                category: project.category || '',
+                category: project.category || categoryOptions[0],
                 status: project.status || 'active',
                 start_date: project.start_date || '',
                 end_date: project.end_date || '',
@@ -122,7 +122,7 @@ export function Projects() {
                 code: '',
                 description: '',
                 budget: '',
-                category: '',
+                category: categoryOptions[0],
                 status: 'active',
                 start_date: '',
                 end_date: '',
@@ -147,8 +147,8 @@ export function Projects() {
                     formData.members.forEach(id => payload.append('members[]', id));
                 } else if (key === 'document') {
                     if (formData[key]) payload.append(key, formData[key]);
-                } else {
-                    payload.append(key, formData[key] === null ? '' : formData[key]);
+                } else if (formData[key] !== null && formData[key] !== '') {
+                    payload.append(key, formData[key]);
                 }
             });
 
