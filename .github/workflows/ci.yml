@@ -40,6 +40,14 @@ jobs:
       - name: Setup PHP sa ekstenzijama
         uses: shivammathur/setup-php@v2
         with:
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+          name: dist
+          path: dist/
+          retention-days: 7
+=======
+>>>>>>> Stashed changes
           php-version: '8.2'
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, gd
           coverage: none
@@ -93,7 +101,11 @@ jobs:
 
       # Deploy Frontend na Vercel (ako je VERCEL_TOKEN konfigurisano)
       - name: Deploy Frontend na Vercel
+<<<<<<< Updated upstream
         if: secrets.VERCEL_TOKEN != ''
+=======
+        if: vars.VERCEL_ENABLED == 'true'
+>>>>>>> Stashed changes
         run: |
           npm install -g vercel
           vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
@@ -101,3 +113,7 @@ jobs:
 
       - name: Deployment Status
         run: echo "✅ Cloud deployment workflow završen. Proveri GitHub Actions secrets ako deployment nije prošao."
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
