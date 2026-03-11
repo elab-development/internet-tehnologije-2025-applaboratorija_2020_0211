@@ -8,13 +8,16 @@ use Illuminate\Support\Facades\Mail;
 
 class EmailService
 {
+    // Besplatni Resend nalog: mejlovi se mogu slati isključivo na verifikovanu adresu vlasnika naloga.
+    private const RESEND_TEST_RECIPIENT = 'ap20200211@student.fon.bg.ac.rs';
+
     public function sendWelcome(User $user): void
     {
         try {
-            $from = config('services.resend.from_email', 'noreply@researchhub.local');
+            $from = config('services.resend.from_email', 'onboarding@resend.dev');
 
-            Mail::send('emails.welcome', ['user' => $user], function ($message) use ($user, $from) {
-                $message->to($user->email)
+            Mail::send('emails.welcome', ['user' => $user], function ($message) use ($from) {
+                $message->to(self::RESEND_TEST_RECIPIENT)
                     ->from($from)
                     ->subject('Dobrodošli u ResearchHub!');
             });
@@ -26,16 +29,10 @@ class EmailService
     public function sendReportSubmitted(Report $report): void
     {
         try {
-            $from = config('services.resend.from_email', 'noreply@researchhub.local');
+            $from = config('services.resend.from_email', 'onboarding@resend.dev');
 
-            $adminEmails = User::where('role', 'admin')->pluck('email')->toArray();
-
-            if (empty($adminEmails)) {
-                return;
-            }
-
-            Mail::send('emails.report-submitted', ['report' => $report], function ($message) use ($adminEmails, $from) {
-                $message->to($adminEmails)
+            Mail::send('emails.report-submitted', ['report' => $report], function ($message) use ($from) {
+                $message->to(self::RESEND_TEST_RECIPIENT)
                     ->from($from)
                     ->subject('Novi izveštaj prosledio korisnik');
             });
@@ -47,10 +44,10 @@ class EmailService
     public function sendPaperDeleted(User $user, string $paperTitle): void
     {
         try {
-            $from = config('services.resend.from_email', 'noreply@researchhub.local');
+            $from = config('services.resend.from_email', 'onboarding@resend.dev');
 
-            Mail::send('emails.paper-deleted', ['user' => $user, 'paperTitle' => $paperTitle], function ($message) use ($user, $from) {
-                $message->to($user->email)
+            Mail::send('emails.paper-deleted', ['user' => $user, 'paperTitle' => $paperTitle], function ($message) use ($from) {
+                $message->to(self::RESEND_TEST_RECIPIENT)
                     ->from($from)
                     ->subject('Rad je obrisan');
             });
