@@ -87,6 +87,8 @@ describe('ContextProvider', () => {
     });
 
     it('čuva token u localStorage kada se pozove setToken', async () => {
+        axiosClient.get.mockResolvedValue({ data: { user: { id: 1, name: 'Test' } } });
+
         render(
             <ContextProvider>
                 <TokenSetter />

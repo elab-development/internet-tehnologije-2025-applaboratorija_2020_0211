@@ -90,13 +90,13 @@ describe('Papers stranica', () => {
     it('renderuje filter za kategoriju', () => {
         renderPapers();
 
-        expect(screen.getByLabelText(/kategorija/i)).toBeInTheDocument();
+        expect(screen.getByText('Kategorija')).toBeInTheDocument();
     });
 
     it('renderuje sort select', () => {
         renderPapers();
 
-        expect(screen.getByLabelText(/sortiraj po/i)).toBeInTheDocument();
+        expect(screen.getByText('Sortiraj po')).toBeInTheDocument();
     });
 
     it('prikazuje rezultate posle učitavanja', async () => {
