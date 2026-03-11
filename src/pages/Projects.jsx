@@ -70,10 +70,9 @@ export function Projects() {
     });
 
     useEffect(() => {
-        axiosClient.get('/users')
+        axiosClient.get('/users/assignable')
             .then(({ data }) => {
                 const userData = data.data || (Array.isArray(data) ? data : []);
-                console.log(userData);
                 setUsers(userData);
             })
             .catch(err => {

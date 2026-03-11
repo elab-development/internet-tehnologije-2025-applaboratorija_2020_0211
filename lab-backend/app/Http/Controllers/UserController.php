@@ -27,6 +27,24 @@ class UserController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/users/assignable",
+     *     summary="Lista korisnika dostupnih za dodavanje na projekat (Researcher/Admin)",
+     *     tags={"Korisnici"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Lista aktivnih korisnika")
+     * )
+     */
+    public function assignable()
+    {
+        $users = User::where('is_active', true)
+            ->where('role', '!=', 'admin')
+            ->orderBy('name')
+            ->get(['id', 'name', 'email', 'role']);
+        return response()->json(['data' => $users]);
+    }
+
+    /**
      * @OA\Put(
      *     path="/api/users/{user}",
      *     summary="Ažuriranje korisnika (Samo Admin)",

@@ -65,6 +65,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     // ═══════════════════════════════════════════════════════
     Route::middleware('role:researcher,admin')->group(function () {
 
+        // Korisnici dostupni za dodavanje na projekat
+        Route::get('/users/assignable', [UserController::class, 'assignable']);
+
         // Projekti – CRUD
         // BEZBEDNOST #2: IDOR – Policy se poziva u kontroleru
         Route::post('/projects',             [ProjectController::class, 'store']);

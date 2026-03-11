@@ -215,9 +215,8 @@ export function Statistics() {
 
             {/* ─── Upozorenje ako se koriste mock podaci ─────────────────── */}
             {usingMock && (
-                <Alert severity="info" sx={{ mb: 3 }}>
-                    Prikazuju se demonstracioni podaci. Statistike će biti
-                    dostupne kada se poveže backend API (Commit 5).
+                <Alert severity="warning" sx={{ mb: 3 }}>
+                    Prikazuju se demonstracioni podaci. Backend API nije dostupan.
                 </Alert>
             )}
 
