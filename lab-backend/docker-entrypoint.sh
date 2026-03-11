@@ -3,24 +3,27 @@
 
 set +e
 
-echo "⏳ Čekanje da MySQL baza postane dostupna..."
-# Čeka dok MySQL kontejner (host 'db') ne odgovori na pingu
-# Koristi /dev/tcp za direktan test konekcije
+echo "⏳ Čekanje da baza postane dostupna..."
+DB_HOST="${DB_HOST:-db}"
+DB_PORT="${DB_PORT:-3306}"
 TIMEOUT=60
 while [ $TIMEOUT -gt 0 ]; do
-    if nc -z db 3306 2>/dev/null; then
-        echo "✅ MySQL je dostupan!"
+    if nc -z "$DB_HOST" "$DB_PORT" 2>/dev/null; then
+        echo "✅ Baza je dostupna!"
         break
     fi
-    echo "Pokušaj konekcije... ($TIMEOUT sekundi preostalo)"
+    echo "Pokušaj konekcije na $DB_HOST:$DB_PORT... ($TIMEOUT sekundi preostalo)"
     sleep 2
     TIMEOUT=$((TIMEOUT - 2))
 done
 
 if [ $TIMEOUT -le 0 ]; then
-    echo "❌ MySQL nije dostupan nakon 60 sekundi!"
+    echo "❌ Baza nije dostupna nakon 60 sekundi!"
     exit 1
 fi
+
+echo "🧹 Brisanje bootstrap keša..."
+rm -f bootstrap/cache/packages.php bootstrap/cache/services.php
 
 echo "📦 Pokretanje migracija..."
 # Pokreće migracije bez brisanja (safe za restart kontejnera)

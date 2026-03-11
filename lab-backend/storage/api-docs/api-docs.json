@@ -1,0 +1,1686 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "ResearchHub API Dokumentacija",
+        "description": "Ovo je REST API specifikacija za sistem laboratorije ResearchHub. Kroz ovaj interfejs možete testirati sve dostupne rute.",
+        "contact": {
+            "name": "ResearchHub Tim",
+            "email": "admin@researchhub.app"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Lokalni Development Server"
+        }
+    ],
+    "paths": {
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Autentifikacija"
+                ],
+                "summary": "Registracija novog korisnika",
+                "operationId": "8a56853624e025573120a09a4c75d468",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Petar Petrović"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "petar@test.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "user",
+                                            "researcher"
+                                        ],
+                                        "example": "researcher"
+                                    },
+                                    "recaptcha_token": {
+                                        "type": "string",
+                                        "example": "mock-token"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Uspešna registracija, vraća token"
+                    },
+                    "422": {
+                        "description": "Validaciona greška"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Autentifikacija"
+                ],
+                "summary": "Prijava korisnika u sistem",
+                "operationId": "a3b306d14572d1f4bd6c064b3233e7b8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@researchhub.app"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Uspešna prijava, vraća token"
+                    },
+                    "401": {
+                        "description": "Pogrešni kredencijali"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Autentifikacija"
+                ],
+                "summary": "Odjava korisnika",
+                "operationId": "fe8f3429cd6979b3b4517e186505f9f9",
+                "responses": {
+                    "200": {
+                        "description": "Uspešna odjava"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/me": {
+            "get": {
+                "tags": [
+                    "Autentifikacija"
+                ],
+                "summary": "Dohvatanje podataka o prijavljenom korisniku",
+                "operationId": "9d9bc556f927575aa492a88c28fe5908",
+                "responses": {
+                    "200": {
+                        "description": "Podaci o korisniku"
+                    },
+                    "401": {
+                        "description": "Niste prijavljeni"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/equipment": {
+            "get": {
+                "tags": [
+                    "Oprema"
+                ],
+                "summary": "Pregled opreme",
+                "operationId": "771e58f407e40ca413f92c85f944e760",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter po statusu",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "available",
+                                "in_use",
+                                "maintenance",
+                                "retired"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "location",
+                        "in": "query",
+                        "description": "Pretraga po lokaciji",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista opreme sa paginacijom"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Oprema"
+                ],
+                "summary": "Dodavanje nove opreme (Samo Admin)",
+                "operationId": "28c5d8c51afa89bb5b58cafcb6ce6020",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "manufacturer",
+                                    "model_number",
+                                    "location",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Mikroskop X200"
+                                    },
+                                    "manufacturer": {
+                                        "type": "string",
+                                        "example": "Zeiss"
+                                    },
+                                    "model_number": {
+                                        "type": "string",
+                                        "example": "M-2024-X2"
+                                    },
+                                    "location": {
+                                        "type": "string",
+                                        "example": "Soba 101"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "available",
+                                            "in_use",
+                                            "maintenance",
+                                            "retired"
+                                        ],
+                                        "example": "available"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Oprema uspešno kreirana"
+                    },
+                    "403": {
+                        "description": "Zabranjen pristup"
+                    },
+                    "422": {
+                        "description": "Greška u validaciji"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/equipment/{equipment}": {
+            "put": {
+                "tags": [
+                    "Oprema"
+                ],
+                "summary": "Ažuriranje postojeće opreme (Samo Admin)",
+                "operationId": "128dcb553b3e3d8a73cf8a7467299ad8",
+                "parameters": [
+                    {
+                        "name": "equipment",
+                        "in": "path",
+                        "description": "ID opreme",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Mikroskop X200"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "available",
+                                            "in_use",
+                                            "maintenance",
+                                            "retired"
+                                        ],
+                                        "example": "maintenance"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Oprema uspešno ažurirana"
+                    },
+                    "403": {
+                        "description": "Zabranjen pristup"
+                    },
+                    "404": {
+                        "description": "Oprema nije pronađena"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Oprema"
+                ],
+                "summary": "Brisanje opreme (Samo Admin)",
+                "operationId": "07ef36965a84c5e50dd5e909518ca3f7",
+                "parameters": [
+                    {
+                        "name": "equipment",
+                        "in": "path",
+                        "description": "ID opreme",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Oprema obrisana"
+                    },
+                    "403": {
+                        "description": "Zabranjen pristup"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/experiments": {
+            "get": {
+                "tags": [
+                    "Eksperimenti"
+                ],
+                "summary": "Pregled svih eksperimenata",
+                "operationId": "a0534edd21fd0b243acea4da324c8610",
+                "parameters": [
+                    {
+                        "name": "project_id",
+                        "in": "query",
+                        "description": "Filter po ID-ju projekta",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter po statusu",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "planning",
+                                "in_progress",
+                                "completed",
+                                "failed"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista eksperimenata sa paginacijom"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/projects/experiments": {
+            "post": {
+                "tags": [
+                    "Eksperimenti"
+                ],
+                "summary": "Dodavanje novog eksperimenta u okviru projekta (Researcher/Admin)",
+                "operationId": "20059f0036f08eba57e8435e6f30169e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "protocol",
+                                    "date_performed",
+                                    "status",
+                                    "project_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Analiza uzorka A1"
+                                    },
+                                    "protocol": {
+                                        "type": "string",
+                                        "example": "Standardni protokol za analizu"
+                                    },
+                                    "date_performed": {
+                                        "type": "string",
+                                        "example": "2025-05-10 14:00"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "planning",
+                                            "in_progress",
+                                            "completed",
+                                            "failed"
+                                        ],
+                                        "example": "planning"
+                                    },
+                                    "project_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Eksperiment uspešno kreiran"
+                    },
+                    "403": {
+                        "description": "Zabranjen pristup"
+                    },
+                    "422": {
+                        "description": "Greška u validaciji"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/experiments/{experiment}": {
+            "put": {
+                "tags": [
+                    "Eksperimenti"
+                ],
+                "summary": "Ažuriranje eksperimenta (Researcher/Admin)",
+                "operationId": "56112aff9cddfb0a1909bec2af7af57d",
+                "parameters": [
+                    {
+                        "name": "experiment",
+                        "in": "path",
+                        "description": "ID eksperimenta",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Ažurirani naziv"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "planning",
+                                            "in_progress",
+                                            "completed",
+                                            "failed"
+                                        ],
+                                        "example": "in_progress"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Eksperiment uspešno ažuriran"
+                    },
+                    "403": {
+                        "description": "Zabranjen pristup"
+                    },
+                    "404": {
+                        "description": "Eksperiment nije pronađen"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Eksperimenti"
+                ],
+                "summary": "Brisanje eksperimenta (Researcher/Admin)",
+                "operationId": "bc568e68958324a84ef764baf36da55f",
+                "parameters": [
+                    {
+                        "name": "experiment",
+                        "in": "path",
+                        "description": "ID eksperimenta",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eksperiment obrisan"
+                    },
+                    "403": {
+                        "description": "Zabranjen pristup"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/favorites": {
+            "get": {
+                "tags": [
+                    "Favoriti"
+                ],
+                "summary": "Pregled omiljenih projekata",
+                "operationId": "81123175f76259d611e2c337477dfa5f",
+                "responses": {
+                    "200": {
+                        "description": "Lista omiljenih projekata sa paginacijom"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Favoriti"
+                ],
+                "summary": "Dodavanje projekta u omiljene",
+                "operationId": "370ffab0458b21c048b584dc20d059e0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "project_id"
+                                ],
+                                "properties": {
+                                    "project_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Projekat dodat u omiljene"
+                    },
+                    "422": {
+                        "description": "Greška u validaciji ili je projekat već dodat"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Favoriti"
+                ],
+                "summary": "Uklanjanje projekta iz omiljenih",
+                "operationId": "fa0c59fb9c161b977258ec7656104ab2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "project_id"
+                                ],
+                                "properties": {
+                                    "project_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Projekat uklonjen iz omiljenih"
+                    },
+                    "404": {
+                        "description": "Projekat nije pronađen u omiljenim"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/profile": {
+            "put": {
+                "tags": [
+                    "Profil"
+                ],
+                "summary": "Ažuriranje profila korisnika",
+                "operationId": "b927bf00923c712a27589c6a510ebbf5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Novi Naziv"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "noviemail@test.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profil uspešno ažuriran"
+                    },
+                    "401": {
+                        "description": "Niste prijavljeni"
+                    },
+                    "422": {
+                        "description": "Greška pri validaciji"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/password": {
+            "put": {
+                "tags": [
+                    "Profil"
+                ],
+                "summary": "Promena lozinke korisnika",
+                "operationId": "0a645daf6864cd029d4ab75a1f5c0164",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "staraLozinka123!"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "novaLozinka123!"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "novaLozinka123!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Lozinka uspešno promenjena"
+                    },
+                    "401": {
+                        "description": "Niste prijavljeni"
+                    },
+                    "422": {
+                        "description": "Greška pri validaciji ili pogrešna trenutna lozinka"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/projects": {
+            "get": {
+                "tags": [
+                    "Projekti"
+                ],
+                "summary": "Pregled svih dostupnih projekata",
+                "operationId": "8d4a13ef3fc773ff4031e515460919ea",
+                "responses": {
+                    "200": {
+                        "description": "Lista projekata sa paginacijom"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Projekti"
+                ],
+                "summary": "Kreiranje novog projekta (Samo Researcher/Admin)",
+                "operationId": "a4dd4c17bf5fc24c224357f03dcc848a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "code"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Novi AI Projekat"
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "PRJ-999"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Detaljan opis"
+                                    },
+                                    "budget": {
+                                        "type": "number",
+                                        "example": "15000"
+                                    },
+                                    "category": {
+                                        "type": "string",
+                                        "example": "research"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "planning",
+                                            "active",
+                                            "completed"
+                                        ]
+                                    },
+                                    "document": {
+                                        "description": "PDF dokumentacija",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Projekat kreiran"
+                    },
+                    "403": {
+                        "description": "Zabranjen pristup (nemate ulogu)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/projects/search": {
+            "get": {
+                "tags": [
+                    "Projekti"
+                ],
+                "summary": "Pretraga i filtriranje projekata",
+                "operationId": "de6b36bcb5faf601c4985ad3e5888162",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Termin za pretragu (naslov, opis, kod)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "Filter po kategoriji",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista filtriranih projekata"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/projects/{project}": {
+            "get": {
+                "tags": [
+                    "Projekti"
+                ],
+                "summary": "Prikaz detalja određenog projekta",
+                "operationId": "1352e06e55f6ab10d3702509cd385918",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "ID projekta",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalji projekta (vođa, članovi, eksperimenti, rezervacije, izveštaji)"
+                    },
+                    "404": {
+                        "description": "Projekat nije pronađen"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Projekti"
+                ],
+                "summary": "Ažuriranje projekta (Samo VOĐA projekta / Admin)",
+                "operationId": "a93b65e3037bfd5ea5cdc1b3dd11ba53",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "ID projekta",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Ažurirani naziv"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "planning",
+                                            "active",
+                                            "completed",
+                                            "archived"
+                                        ]
+                                    },
+                                    "document": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Projekat uspesno azuriran"
+                    },
+                    "403": {
+                        "description": "Zabranjen pristup (niste vođa projekta)"
+                    },
+                    "404": {
+                        "description": "Projekat nije pronadjen"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Projekti"
+                ],
+                "summary": "Brisanje projekta (Samo VOĐA projekta / Admin)",
+                "operationId": "63c289a907902132dd95dd7ecb50143f",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "ID projekta",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Projekat obrisan"
+                    },
+                    "403": {
+                        "description": "Zabranjen pristup (niste vođa projekta)"
+                    },
+                    "404": {
+                        "description": "Projekat nije pronadjen"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/projects/{project}/experiments": {
+            "get": {
+                "tags": [
+                    "Projekti"
+                ],
+                "summary": "Pregled svih eksperimenata na projektu",
+                "operationId": "658c72d7357d35eddacfad470b803a37",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "description": "ID projekta",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista eksperimenata ovog projekta sa paginacijom"
+                    },
+                    "404": {
+                        "description": "Projekat nije pronađen"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/reports": {
+            "get": {
+                "tags": [
+                    "Izveštaji"
+                ],
+                "summary": "Pregled svih prijava/izveštaja (Samo Admin)",
+                "operationId": "42398321972bc3074eef76718e0fd9dc",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter po statusu",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "submitted",
+                                "reviewed",
+                                "approved"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "project_id",
+                        "in": "query",
+                        "description": "Filter po projektu",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista izveštaja sa paginacijom"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Izveštaji"
+                ],
+                "summary": "Kreiranje novog izveštaja",
+                "operationId": "318de4ef8123b483320dc9dbb45b6a43",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "description",
+                                    "status",
+                                    "project_id"
+                                ],
+                                "properties": {
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Opis izveštaja"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "submitted",
+                                            "reviewed",
+                                            "approved"
+                                        ],
+                                        "example": "draft"
+                                    },
+                                    "project_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Izveštaj uspešno kreiran"
+                    },
+                    "422": {
+                        "description": "Greška u validaciji"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/reports/{report}": {
+            "put": {
+                "tags": [
+                    "Izveštaji"
+                ],
+                "summary": "Ažuriranje izveštaja (Samo Admin)",
+                "operationId": "8b67b88c8a8b114598906eb4d5ce611d",
+                "parameters": [
+                    {
+                        "name": "report",
+                        "in": "path",
+                        "description": "ID izveštaja",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Novi opis"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "submitted",
+                                            "reviewed",
+                                            "approved"
+                                        ],
+                                        "example": "submitted"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Izveštaj uspešno ažuriran"
+                    },
+                    "403": {
+                        "description": "Zabranjen pristup"
+                    },
+                    "404": {
+                        "description": "Izveštaj nije pronađen"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/reservations": {
+            "get": {
+                "tags": [
+                    "Rezervacije"
+                ],
+                "summary": "Pregled rezervacija opreme",
+                "operationId": "fbc6050d9f7fdb07075d3aaeb157ffa9",
+                "parameters": [
+                    {
+                        "name": "equipment_id",
+                        "in": "query",
+                        "description": "Filter po ID-ju opreme",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter po statusu",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "approved",
+                                "rejected",
+                                "completed",
+                                "cancelled"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista rezervacija sa paginacijom"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Rezervacije"
+                ],
+                "summary": "Kreiranje nove rezervacije (Researcher/Admin)",
+                "operationId": "01e3d21dc330a31de025203bc142ffa3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "start_time",
+                                    "end_time",
+                                    "purpose",
+                                    "status",
+                                    "equipment_id",
+                                    "project_id"
+                                ],
+                                "properties": {
+                                    "start_time": {
+                                        "type": "string",
+                                        "example": "2025-06-01 10:00"
+                                    },
+                                    "end_time": {
+                                        "type": "string",
+                                        "example": "2025-06-01 12:00"
+                                    },
+                                    "purpose": {
+                                        "type": "string",
+                                        "example": "Korišćenje mikroskopa za projekat X"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "approved",
+                                            "rejected",
+                                            "completed",
+                                            "cancelled"
+                                        ],
+                                        "example": "pending"
+                                    },
+                                    "equipment_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "project_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Rezervacija uspešno kreirana"
+                    },
+                    "422": {
+                        "description": "Greška u validaciji ili je oprema zauzeta/nedostupna"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/reservations/{reservation}": {
+            "delete": {
+                "tags": [
+                    "Rezervacije"
+                ],
+                "summary": "Brisanje rezervacije (Researcher/Admin)",
+                "operationId": "9cb75e88bfb3a102881ea262dde33019",
+                "parameters": [
+                    {
+                        "name": "reservation",
+                        "in": "path",
+                        "description": "ID rezervacije",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rezervacija obrisana"
+                    },
+                    "403": {
+                        "description": "Zabranjen pristup"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/samples": {
+            "get": {
+                "tags": [
+                    "Uzorci"
+                ],
+                "summary": "Pregled svih uzoraka",
+                "operationId": "e6d83cf322c028d3d22830be8975b142",
+                "parameters": [
+                    {
+                        "name": "experiment_id",
+                        "in": "query",
+                        "description": "Filter po ID-ju eksperimenta",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filter po tipu uzorka",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista uzoraka sa paginacijom"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Uzorci"
+                ],
+                "summary": "Dodavanje novog uzorka (Researcher/Admin)",
+                "operationId": "5c2e419e38eedd00411c24ff680a940a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "code",
+                                    "type",
+                                    "source",
+                                    "location",
+                                    "experiment_id"
+                                ],
+                                "properties": {
+                                    "code": {
+                                        "type": "string",
+                                        "example": "SMP-100"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "Biološki"
+                                    },
+                                    "source": {
+                                        "type": "string",
+                                        "example": "Pacijent A"
+                                    },
+                                    "location": {
+                                        "type": "string",
+                                        "example": "Zamrzivač 1"
+                                    },
+                                    "metadata": {
+                                        "type": "string",
+                                        "example": "{}"
+                                    },
+                                    "experiment_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Uzorak uspešno kreiran"
+                    },
+                    "403": {
+                        "description": "Zabranjen pristup"
+                    },
+                    "422": {
+                        "description": "Greška u validaciji"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/statistics": {
+            "get": {
+                "tags": [
+                    "Statistike"
+                ],
+                "summary": "Dohvatanje sistemskih statistika (Researcher/Admin)",
+                "operationId": "1502b3091dc313de47499cddeda4014f",
+                "responses": {
+                    "200": {
+                        "description": "Statistički podaci za kontrolnu tablu"
+                    },
+                    "403": {
+                        "description": "Zabranjen pristup"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users": {
+            "get": {
+                "tags": [
+                    "Korisnici"
+                ],
+                "summary": "Pregled svih korisnika (Samo Admin)",
+                "operationId": "c457726701591d1183b53aa71fc13441",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Pretraga po imenu ili email-u",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista korisnika sa paginacijom"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/{user}": {
+            "put": {
+                "tags": [
+                    "Korisnici"
+                ],
+                "summary": "Ažuriranje korisnika (Samo Admin)",
+                "operationId": "e29fc231c7937ab09483d35e6e3d1214",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID korisnika",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "user",
+                                            "researcher",
+                                            "admin"
+                                        ],
+                                        "example": "researcher"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Korisnik uspešno ažuriran"
+                    },
+                    "403": {
+                        "description": "Zabranjen pristup"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Korisnici"
+                ],
+                "summary": "Brisanje korisnika (Samo Admin)",
+                "operationId": "e0f9a385a1d6788b99e519bd98cf7239",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "ID korisnika",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Korisnik obrisan"
+                    },
+                    "403": {
+                        "description": "Zabranjen pristup"
+                    },
+                    "422": {
+                        "description": "Nemoguće obrisati sopstveni nalog"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Unesite Sanctum token dobijen nakon logina.",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Autentifikacija",
+            "description": "Autentifikacija"
+        },
+        {
+            "name": "Oprema",
+            "description": "Oprema"
+        },
+        {
+            "name": "Eksperimenti",
+            "description": "Eksperimenti"
+        },
+        {
+            "name": "Favoriti",
+            "description": "Favoriti"
+        },
+        {
+            "name": "Profil",
+            "description": "Profil"
+        },
+        {
+            "name": "Projekti",
+            "description": "Projekti"
+        },
+        {
+            "name": "Izveštaji",
+            "description": "Izveštaji"
+        },
+        {
+            "name": "Rezervacije",
+            "description": "Rezervacije"
+        },
+        {
+            "name": "Uzorci",
+            "description": "Uzorci"
+        },
+        {
+            "name": "Statistike",
+            "description": "Statistike"
+        },
+        {
+            "name": "Korisnici",
+            "description": "Korisnici"
+        }
+    ]
+}
