@@ -22,7 +22,7 @@ jobs:
           cache-dependency-path: './package-lock.json'
 
       - name: Instalacija zavisnosti
-        run: npm ci
+        run: npm install
 
       - name: Pokretanje Vitest testova
         run: npm run test:run
@@ -54,7 +54,7 @@ jobs:
         run: php artisan key:generate --env=testing
 
       - name: Pokretanje PHPUnit testova (sa SQLite in-memory bazom)
-        run: php artisan test
+        run: ./vendor/bin/phpunit
 
   # 3. Provera Docker Build-a (Zavisi od prolaska testova)
   docker-build-check:

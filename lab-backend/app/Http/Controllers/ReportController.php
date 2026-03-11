@@ -58,10 +58,10 @@ class ReportController extends Controller
     {
         $data = $request->validate([
             'description' => 'required|string',
-            'status'      => 'required|in:draft,submitted,reviewed,approved',
             'project_id'  => 'required|exists:projects,id',
         ]);
 
+        $data['status']  = 'submitted';
         $data['user_id'] = $request->user()->id;
 
         $report = Report::create($data);
