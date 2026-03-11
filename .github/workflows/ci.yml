@@ -54,7 +54,9 @@ jobs:
         run: php artisan key:generate --env=testing
 
       - name: Pokretanje PHPUnit testova (sa SQLite in-memory bazom)
-        run: ./vendor/bin/phpunit
+        run: |
+          mkdir -p tests/Unit tests/Feature
+          ./vendor/bin/phpunit
 
   # 3. Provera Docker Build-a (Zavisi od prolaska testova)
   docker-build-check:
