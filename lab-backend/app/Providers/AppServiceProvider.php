@@ -12,6 +12,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,6 +21,13 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // ─── HTTPS: Forsira HTTPS scheme u produkciji ─────────────
+        // Render koristi reverse proxy koji interno prosleđuje HTTP,
+        // pa Laravel bez ovoga generiše HTTP asset URL-ove (Mixed Content greška).
+        if (config('app.env') === 'production') {
+            URL::forceScheme('https');
+        }
+
         // ─── BEZBEDNOST #2: IDOR – Registracija Policies ─────────
         Gate::policy(Project::class,     ProjectPolicy::class);
         Gate::policy(Experiment::class,  ExperimentPolicy::class);

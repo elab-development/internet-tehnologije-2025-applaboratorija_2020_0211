@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // ─── HTTPS: Veruj Render-ovom reverse proxy-ju ────────────
+        // Render terminira SSL i prosleđuje X-Forwarded-Proto: https header.
+        // Bez ovoga Laravel generiše HTTP asset URL-ove → Mixed Content greška.
+        $middleware->trustProxies(at: '*');
+
         // Aplikacija koristi Bearer token auth (ne session-based SPA auth),
         // pa EnsureFrontendRequestsAreStateful nije potreban i aktivno izaziva
         // CSRF token mismatch grešku za sve POST/PUT/DELETE zahteve sa localhost:3000.
