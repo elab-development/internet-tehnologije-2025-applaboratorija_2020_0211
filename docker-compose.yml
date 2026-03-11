@@ -39,6 +39,7 @@ services:
       - ./lab-backend/storage/app/public:/var/www/html/storage/app/public
     environment:
       # Prepisu .env fajl unutar kontejnera
+      DB_CONNECTION: mysql
       DB_HOST: db
       DB_PORT: 3306
       DB_DATABASE: researchhub

@@ -52,8 +52,7 @@ class StatisticsController extends Controller
 
         // ─── Projekti po mesecima (poslednjih 6) → [{month, count}] ──
         $projectsByMonth = Project::selectRaw(
-                'DATE_FORMAT(created_at, "%b %Y") as month,
-                 YEAR(created_at) as yr,
+                'YEAR(created_at) as yr,
                  MONTH(created_at) as mn,
                  COUNT(*) as count'
             )
@@ -61,7 +60,10 @@ class StatisticsController extends Controller
             ->groupByRaw('YEAR(created_at), MONTH(created_at)')
             ->orderByRaw('YEAR(created_at), MONTH(created_at)')
             ->get()
-            ->map(fn($r) => ['month' => $r->month, 'count' => (int) $r->count])
+            ->map(fn($r) => [
+                'month' => date('M Y', mktime(0, 0, 0, $r->mn, 1, $r->yr)),
+                'count' => (int) $r->count,
+            ])
             ->values()
             ->toArray();
 
